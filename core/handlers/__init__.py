@@ -41,5 +41,5 @@ class CallbackReceiver:
         self.callback_data: str = callback.data
 
 
-    async def get_callback(self, callback):
+    async def get_callback(self):
         pass

@@ -26,6 +26,6 @@ class GetForceReplySerializer(MessageForceReply):
 
 
 class GetCallbackSerializers(CallbackReceiver):
-    async def get_callback(self, callback):
+    async def get_callback(self):
         await bot.send_message(chat_id=self.chat_id,
                                text=f"you clicked {self.callback_data}")
