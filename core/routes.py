@@ -45,7 +45,8 @@ def route_assign(client_info:dict, chat_id:int, set_route:str=None) -> None:
     if client_info is None:
         CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}}})
 
-    CLIENT_INFO[chat_id].update({"route": set_route})
+    if set_route is not None:
+        CLIENT_INFO[chat_id].update({"route": set_route})
     return None
 
 
@@ -53,7 +54,7 @@ def route_check(client_info:dict, allowed_route:str=None) -> None:
     route: str | None = client_info.get("route", None) if client_info is not None else None
 
     if allowed_route is not None and allowed_route != route:
-        raise ValueError("Mismatched Routes.")
+        raise ValueError(f"Mismatched Routes: allowed_route - '{allowed_route}', your_route: '{route}'")
 
     return None
 
