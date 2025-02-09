@@ -1,9 +1,10 @@
 # Now Testing
-from core.routes import route_process
+from core.routes import route_process, CLIENT_INFO
+from core.handlers.callback_handlers import *
 from core.handlers.command_handlers import *
 from core.handlers.message_handlers import *
 from project.serializers import (GetForceReplySerializer,
-                                 GetCallbackSerializers,)
+                                 GetCallbackSerializers, GetMessageSerializer, )
 
 
 # This is a test code
@@ -23,8 +24,31 @@ async def command_start(message, **kwargs):
     await handler_sr.send_message()
 
 
-async def callback_start(callback, **kwargs):
+async def callback_btn1(callback, **kwargs):
     route_process(callback=callback, **kwargs)
-    handler_sr = GetCallbackSerializers(callback=callback)
+    inline_json = {
+        "btn_a": {"callback_data": "btn_a"},
+        "btn_b": {"callback_data": "btn_b"},
+        "btn_c": {"callback_data": "btn_c"},
+        "btn_d": {"callback_data": "btn_d"},
+    }
 
+    #handler_sr = CallbackReceiverWithInlineMarkup(callback=callback,
+    #                                             bot_text="you are now in btn1 route",
+    #                                             inline_json=inline_json,
+    #                                             row_with=2)
+    handler_sr = CallbackReceiverWithForceReply(callback=callback,
+                                                bot_text="Type any text.",)
+
+
+    await handler_sr.send_message()
+
+
+async def callback_other(callback, **kwargs):
+    handler_sr = GetCallbackSerializers(callback=callback)
     await handler_sr.get_callback()
+
+
+async def get_message(message, **kwargs):
+    handler_sr = GetMessageSerializer(message=message)
+    await handler_sr.get_message()
