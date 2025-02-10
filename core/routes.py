@@ -1,4 +1,5 @@
-from main import bot, logger
+from main import (bot,
+                  logger)
 from core.config import ALLOWED_CHAT_TYPE
 
 
@@ -9,10 +10,10 @@ def connector_callback(view,
                        set_route:str=None,
                        allowed_route:str=None,
                        callback_data:str=None,
-                       **kwargs):
+                       **kwargs) -> None:
     """
     connector_callback:
-    mapper function between route and view.
+    mapper function between route and callback view.
 
     :param view: function class that you want to map with specific route
     :param set_route: assign route to view function
@@ -27,13 +28,26 @@ def connector_callback(view,
                                                                    allowed_route=allowed_route,
                                                                    callback_data=callback_data,),
                                **kwargs)(view)
+    return None
 
 
 def connector_command(view,
                       commands:list=["start"],
                       set_route:str=None,
                       allowed_route:str=None,
-                      **kwargs):
+                      **kwargs) -> None:
+    """
+    connector_command:
+    mapper function between route and command view.
+
+    :param view:
+    :param commands:
+    :param set_route:
+    :param allowed_route:
+    :param kwargs:
+    :return:
+    """
+
 
     if set_route is None:
         raise ValueError("you have to assign 'set_route' to use 'command_connector'")
@@ -44,22 +58,43 @@ def connector_command(view,
                                                            allowed_route=allowed_route),
                         chat_types=ALLOWED_CHAT_TYPE,
                         **kwargs)(view)
+    return None
 
 
 def connector_message(view,
                       set_route:str=None,
                       allowed_route:str=None,
-                      **kwargs):
+                      **kwargs) -> None:
+    """
+    connector_message:
+    mapper function between route and message view.
 
+    :param view:
+    :param set_route:
+    :param allowed_route:
+    :param kwargs:
+    :return: None
+    """
     bot.message_handler(func=lambda message: route_process(reply=message,
                                                            set_route=set_route,
                                                            allowed_route=allowed_route),
                         chat_types=ALLOWED_CHAT_TYPE,
                         **kwargs)(view)
-
+    return None
 
 
 def __assign_route(client_info:dict, chat_id:int, set_route:str) -> None:
+    """
+    __assign_route:
+    this method is charge of assigning route to telebot processes.
+    this class is not designed for direct use.
+
+    :param client_info: get from route_process
+    :param chat_id: get from route_process
+    :param set_route: get from route_process
+    :return: None
+    """
+
     if client_info is None:
         CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}}})
 
@@ -69,26 +104,51 @@ def __assign_route(client_info:dict, chat_id:int, set_route:str) -> None:
 
 
 def __check_callback(reply, callback_data:str) -> bool:
-    condition: bool = True
-    if callback_data is not None:
-        condition = reply.data == callback_data
+    """
+    __check_callback:
+    this method is charge of checking callback data during callback processes.
+    this class is not designed for direct use.
 
-    return condition
+    :param reply: get from route_process (message or callback)
+    :param callback_data: get from route_process
+    :return: bool
+    """
+    return reply.data == callback_data if callback_data is not None else True
 
 
 def __check_route(client_info:dict, allowed_route:str) -> bool:
-    condition: bool = True
-    client_route: str | None = client_info.get("route", None) if client_info is not None else None
-    if allowed_route is not None:
-        condition = client_route == allowed_route
+    """
+    __check_route:
+    this method is charge of checking allowed route during executing telebot processes.
+    this class is not designed for direct use.
 
-    return condition
+    :param client_info: get from route_process
+    :param allowed_route: get from route_process
+    :return: bool
+    """
+
+    client_route: str | None = client_info.get("route", None) if client_info is not None else None
+    return client_route == allowed_route if allowed_route is not None else True
 
 
 def route_process(reply,
                   set_route:str =None,
                   allowed_route:str=None,
                   callback_data:str=None,) -> bool:
+    """
+    route_process:
+    route_process is related with validating callback data or route and assigning route for telebot processes.
+    this function is return bool so that acts as a condition in handlers.
+
+    please refer to:
+    https://pytba.readthedocs.io/en/latest/sync_version/index.html#telebot.TeleBot.message_handler
+
+    :param reply: message or
+    :param set_route:
+    :param allowed_route:
+    :param callback_data:
+    :return:
+    """
 
     chat_id: int = reply.from_user.id
     client_info: dict | None = CLIENT_INFO.get(chat_id, None)
