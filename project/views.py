@@ -8,8 +8,7 @@ from project.serializers import (GetForceReplySerializer,
 
 
 # This is a test code
-async def command_start(message, **kwargs):
-    route_process(message=message, **kwargs)
+async def command_start(message):
     inline_json = {
         "btn1": {"callback_data": "btn1"},
         "btn2": {"callback_data": "btn2"},
@@ -24,8 +23,7 @@ async def command_start(message, **kwargs):
     await handler_sr.send_message()
 
 
-async def callback_btn1(callback, **kwargs):
-    route_process(callback=callback, **kwargs)
+async def callback_btn1(callback):
     inline_json = {
         "btn_a": {"callback_data": "btn_a"},
         "btn_b": {"callback_data": "btn_b"},
@@ -44,11 +42,17 @@ async def callback_btn1(callback, **kwargs):
     await handler_sr.send_message()
 
 
-async def callback_other(callback, **kwargs):
+async def callback_btn2(callback):
     handler_sr = GetCallbackSerializers(callback=callback)
     await handler_sr.get_callback()
 
 
-async def get_message(message, **kwargs):
+async def get_message(message):
     handler_sr = GetMessageSerializer(message=message)
     await handler_sr.get_message()
+
+
+
+async def callback_other(callback):
+    handler_sr = GetCallbackSerializers(callback=callback)
+    await handler_sr.get_callback()
