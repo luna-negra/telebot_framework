@@ -1,4 +1,3 @@
-from functools import partial
 from core.routes import (connector_callback,
                          connector_command,
                          connector_message,)
