@@ -71,11 +71,7 @@ def __assign_route(client_info:dict, chat_id:int, set_route:str) -> None:
 def __check_callback(reply, callback_data:str) -> bool:
     condition: bool = True
     if callback_data is not None:
-        try:
-            condition = reply.data == callback_data
-
-        except Exception as e:
-            print(e)
+        condition = reply.data == callback_data
 
     return condition
 
