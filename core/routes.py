@@ -25,9 +25,7 @@ def connector_callback(view,
     bot.callback_query_handler(func=lambda callback: route_process(reply=callback,
                                                                    set_route=set_route,
                                                                    allowed_route=allowed_route,
-                                                                   callback_data=callback_data,
-                                                                   view=view),
-                               chat_types=ALLOWED_CHAT_TYPE,
+                                                                   callback_data=callback_data,),
                                **kwargs)(view)
 
 
