@@ -16,10 +16,11 @@ class CallbackReceiverBasic(CallbackReceiver):
         self.bot_text: str = kwargs.get("bot_text")
         self.bot_markup = kwargs.get("bot_markup", None)
 
-    async def send_message(self):
+    async def send_message(self) -> None:
         await bot.send_message(chat_id=self.chat_id,
                                text=self.bot_text,
                                reply_markup=self.bot_markup)
+        return None
 
 
 class CallbackReceiverWithForceReply(CallbackReceiverBasic):
