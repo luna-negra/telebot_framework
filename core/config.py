@@ -1,6 +1,7 @@
 # Set the argument for asynchronous telebot instance.
 
 from os import getenv
+from telebot.types import BotCommand
 
 
 ### TELEGRAM BOT CONFIG ###
@@ -84,6 +85,15 @@ INSTALLED_APPS: list | tuple = (
 ALLOWED_CHAT_TYPE: list = ["private"]
 
 
+# Set menu button for your bot.
+# use BotCommand(command="YOUR_COMMAND", description="COMMAND_DESCRIPTION")
+# command name should be lower cases.
+# if you change MENU_COMMANDS, remove your bot and re-enter to apply changes.
+MENU_COMMANDS: list = [
+    BotCommand(command="main", description="Main")
+]
+
+
 ### TELEGRAM BOT CONFIG END ###
 
 
@@ -92,7 +102,6 @@ ALLOWED_CHAT_TYPE: list = ["private"]
 # default is ERROR
 # possible values: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
 LOG_LEVEL = "ERROR"
-
 
 
 ### LOGGING CONFIG END ###

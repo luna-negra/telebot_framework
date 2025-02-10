@@ -18,8 +18,16 @@ bot = AsyncTeleBot(token=TELEBOT_TOKEN,
                    colorful_logs=COLORFUL_LOG,
                    validate_token=VALIDATE_TOKEN)
 
+
 # set Log Level
 logger.setLevel(level=LOG_LEVEL)
+
+
+# main for set menu and polling.
+async def main() -> None:
+    await bot.set_my_commands(commands=MENU_COMMANDS)
+    await bot.polling()
+    return None
 
 
 # start main
@@ -42,4 +50,4 @@ if __name__ == "__main__":
             break
 
     # execute polling in asynchronous
-    asyncio.run(bot.polling())
+    asyncio.run(main())
