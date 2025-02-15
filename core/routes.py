@@ -1,5 +1,5 @@
-from main import (bot,
-                  logger)
+from execute import (bot,
+                     logger)
 from core.config import ALLOWED_CHAT_TYPE
 
 
@@ -154,7 +154,6 @@ def route_process(reply,
     client_info: dict | None = CLIENT_INFO.get(chat_id, None)
     condition1: bool = __check_route(client_info=client_info, allowed_route=allowed_route)
     condition2: bool = __check_callback(reply=reply, callback_data=callback_data)
-
     if condition1 and condition2:
         if set_route is not None:
             __assign_route(client_info=client_info, chat_id=chat_id, set_route=set_route)

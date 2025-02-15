@@ -90,7 +90,7 @@ ALLOWED_CHAT_TYPE: list = ["private"]
 # command name should be lower cases.
 # if you change MENU_COMMANDS, remove your bot and re-enter to apply changes.
 MENU_COMMANDS: list = [
-    BotCommand(command="main", description="Main")
+    BotCommand(command="main", description="Main"),
 ]
 
 
