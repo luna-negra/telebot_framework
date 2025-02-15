@@ -24,7 +24,7 @@ logger.setLevel(level=LOG_LEVEL)
 
 
 # main for set menu and polling.
-async def main() -> None:
+async def execute() -> None:
     await bot.set_my_commands(commands=MENU_COMMANDS)
     await bot.polling()
     return None
@@ -50,4 +50,4 @@ if __name__ == "__main__":
             break
 
     # execute polling in asynchronous
-    asyncio.run(main())
+    asyncio.run(execute())

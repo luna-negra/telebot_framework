@@ -1,7 +1,7 @@
 from telebot.util import quick_markup
 from telebot.types import ForceReply
 from core.handlers import MsgReceiver
-from main import bot
+from execute import bot
 
 
 class CommandReceiver(MsgReceiver):
