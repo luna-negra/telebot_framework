@@ -91,7 +91,6 @@ ALLOWED_CHAT_TYPE: list = ["private"]
 # if you change MENU_COMMANDS, remove your bot and re-enter to apply changes.
 MENU_COMMANDS: list = [
     BotCommand(command="main", description="Main"),
-    BotCommand(command="pay_test", description="Test Payment"),
 ]
 
 
