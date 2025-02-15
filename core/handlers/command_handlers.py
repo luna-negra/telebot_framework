@@ -47,4 +47,4 @@ class CommandReceiverWithInlineMarkup(CommandReceiver):
 
     def __init__(self, message=None, **kwargs):
         super(CommandReceiverWithInlineMarkup, self).__init__(message=message, **kwargs)
-        self.bot_markup = quick_markup(values=kwargs.get("inline_json"), row_width=kwargs.get("row_with", 2))
+        self.bot_markup = quick_markup(values=kwargs.get("inline_json", {}), row_width=kwargs.get("row_with", 2))
