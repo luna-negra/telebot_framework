@@ -6,10 +6,11 @@ from core.config import ALLOWED_CHAT_TYPE
 # temporarily save the client information
 CLIENT_INFO: dict = {}
 
+
 def connector_callback(view,
+                       callback_data:str=None,
                        set_route:str=None,
                        allowed_route:str=None,
-                       callback_data:str=None,
                        **kwargs) -> None:
     """
     connector_callback:
@@ -83,7 +84,7 @@ def connector_message(view,
     return None
 
 
-def __assign_route(client_info:dict, chat_id:int, set_route:str) -> None:
+def assign_route(client_info:dict, chat_id:int, set_route:str) -> None:
     """
     __assign_route:
     this method is charge of assigning route to telebot processes.
@@ -96,7 +97,7 @@ def __assign_route(client_info:dict, chat_id:int, set_route:str) -> None:
     """
 
     if client_info is None:
-        CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}}})
+        CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}, "is_signin": False}})
 
     if set_route is not None:
         CLIENT_INFO[chat_id].update({"route": set_route})
@@ -143,7 +144,7 @@ def route_process(reply,
     please refer to:
     https://pytba.readthedocs.io/en/latest/sync_version/index.html#telebot.TeleBot.message_handler
 
-    :param reply: message or
+    :param reply: message or callback
     :param set_route:
     :param allowed_route:
     :param callback_data:
@@ -156,7 +157,7 @@ def route_process(reply,
     condition2: bool = __check_callback(reply=reply, callback_data=callback_data)
     if condition1 and condition2:
         if set_route is not None:
-            __assign_route(client_info=client_info, chat_id=chat_id, set_route=set_route)
+            assign_route(client_info=client_info, chat_id=chat_id, set_route=set_route)
         return True
 
     return False

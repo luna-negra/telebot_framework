@@ -1,10 +1,13 @@
+# Deprecated
+
+
 from telebot.util import quick_markup
 from telebot.types import ForceReply
-from core.handlers import MsgReceiver
+from core.handlers import MessageReceiver
 from execute import bot
 
 
-class CommandReceiver(MsgReceiver):
+class CommandReceiverBasic(MessageReceiver):
     """
     CommandReceiver:
     this class is charge of receiving command from client
@@ -12,12 +15,11 @@ class CommandReceiver(MsgReceiver):
     """
 
     def __init__(self, message, **kwargs):
-        super(CommandReceiver, self).__init__(message=message)
+        super(CommandReceiverBasic, self).__init__(message=message)
         self.command: str = message.text.replace("/", "")
         self.entities = message.entities
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
-
 
     async def send_message(self) -> None:
         await bot.send_message(chat_id=self.chat_id,
@@ -26,7 +28,7 @@ class CommandReceiver(MsgReceiver):
         return None
 
 
-class CommandReceiverWithForceReply(CommandReceiver):
+class CommandReceiverWithForceReply(CommandReceiverBasic):
     """
     CommandReceiverWithForceReply:
     this class is charge of receiving command from client and return ForceReply markup.
@@ -38,7 +40,7 @@ class CommandReceiverWithForceReply(CommandReceiver):
         self.bot_markup = ForceReply()
 
 
-class CommandReceiverWithInlineMarkup(CommandReceiver):
+class CommandReceiverWithInlineMarkup(CommandReceiverBasic):
     """
     CommandReceiverWithInlineMarkup:
     this class is charge of receiving command from client and return quick_markup markup.

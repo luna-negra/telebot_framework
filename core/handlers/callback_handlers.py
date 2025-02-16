@@ -1,10 +1,13 @@
+# Deprecated
+
+
 from telebot.util import quick_markup
 from telebot.types import ForceReply
-from core.handlers import CallbackReceiver
+from core.handlers import CallBackReceiver
 from execute import bot
 
 
-class CallbackReceiverBasic(CallbackReceiver):
+class CallbackReceiverBasic(CallBackReceiver):
     """
     CallbackReceiverBasic
     this class is charge of receiving callback data from client.
@@ -35,7 +38,7 @@ class CallbackReceiverWithForceReply(CallbackReceiverBasic):
         self.bot_markup = ForceReply()
 
 
-class CallbackReceiverWithInlineMarkup(CallbackReceiverWithForceReply):
+class CallbackReceiverWithInlineMarkup(CallbackReceiverBasic):
     """
     CallbackReceiverWithInlineMarkup:
     this class is charge of receiving callback data from client and return quick_markup markup.
