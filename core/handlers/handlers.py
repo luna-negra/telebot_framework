@@ -1,6 +1,6 @@
 from telebot.types import ForceReply
 from telebot.util import quick_markup
-from core.handlers import Receiver
+from core.handlers import *
 from core.routes import CLIENT_INFO
 from execute import bot
 
@@ -22,9 +22,43 @@ class ReceiverBasic(Receiver):
 
 
 class ReceiverWithForceReply(ReceiverBasic):
+    class Meta:
+        fields = None
+        reply_text = None
+
     def __init__(self, types, **kwargs):
         super(ReceiverWithForceReply, self).__init__(types=types, **kwargs)
+        self.client_data = CLIENT_INFO[self.chat_id]["data"]
         self.bot_markup = ForceReply()
+        self.fields = self.Meta.fields
+        self.reply_text = self.Meta.reply_text if self.Meta.reply_text is not None else {field:field for field in self.fields}
+
+    async def get_input(self) -> bool:
+        flag: bool = False
+        index: int = CLIENT_INFO[self.chat_id].get("index")
+
+        if index < len(self.fields):
+            if index != 0:
+                self.client_data.update({self.fields[index - 1]: self.client_response})
+
+            field = self.fields[index]
+            self.bot_text = self.reply_text[field]
+
+            await super().send_message()
+            CLIENT_INFO[self.chat_id].update({"index": index + 1})
+
+        else:
+            self.client_data.update({self.fields[index - 1]: self.client_response})
+            CLIENT_INFO[self.chat_id].update({"index": 0})
+            await self.process_input()
+            flag = True
+
+        return flag
+
+    async def process_input(self) -> bool:
+        pass
+
+
 
 
 class ReceiverWithInlineMarkup(ReceiverBasic):

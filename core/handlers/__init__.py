@@ -1,5 +1,5 @@
 from datetime import datetime
-from telebot.types import Message
+from telebot.types import (Message, CallbackQuery)
 
 
 class MessageReceiver:
