@@ -1,3 +1,4 @@
+import re
 from telebot.types import ForceReply
 from telebot.util import quick_markup
 from core.handlers import *
@@ -24,41 +25,70 @@ class ReceiverBasic(Receiver):
 class ReceiverWithForceReply(ReceiverBasic):
     class Meta:
         fields = None
-        reply_text = None
+        fields_text = None
+        fields_regex = None
+        fields_error_msg = None
 
     def __init__(self, types, **kwargs):
         super(ReceiverWithForceReply, self).__init__(types=types, **kwargs)
         self.client_data = CLIENT_INFO[self.chat_id]["data"]
         self.bot_markup = ForceReply()
-        self.fields = self.Meta.fields
-        self.reply_text = self.Meta.reply_text if self.Meta.reply_text is not None else {field:field for field in self.fields}
 
-    async def get_input(self) -> bool:
-        flag: bool = False
+        self.fields = getattr(self.Meta, 'fields', ())
+        self.fields_text = getattr(self.Meta, 'fields_text', {field: field for field in self.fields})
+        self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
+        self.fields_error_msg = getattr(self.Meta, 'fields_error_msg', {field: f"'{field}' does not match regex." for field in self.fields})
+
+    async def get_client_data(self) -> bool:
+        # Exit if there is no fields
+        if len(self.fields) == 0:
+            # Logger
+            return True
+
         index: int = CLIENT_INFO[self.chat_id].get("index")
+        if index != 0 :
+            pre_index = index - 1
+            pre_field = self.fields[pre_index]
+            regex_list = self.fields_regex.get(pre_field, [".*"])
+            error_msg = self.fields_error_msg.get(pre_field, f"'{pre_field}' is not satisfying regex.")
 
-        if index < len(self.fields):
-            if index != 0:
-                self.client_data.update({self.fields[index - 1]: self.client_response})
+            if not isinstance(regex_list, (list, tuple)):
+                regex_list = [regex_list]
 
+            if not isinstance(error_msg, (list, tuple)):
+                error_msg = [error_msg]
+
+            for regex in regex_list:
+                inner_index = regex_list.index(regex)
+                if not re.search(pattern=regex, string=self.client_response):
+                    self.bot_text = error_msg[0] if len(error_msg) != len(regex_list) else error_msg[inner_index]
+                    self.bot_markup = None
+                    CLIENT_INFO[self.chat_id].update({"index": 0, "data": {}})
+                    await super().send_message()
+                    return True
+
+            CLIENT_INFO[self.chat_id]["data"].update({pre_field: self.client_response})
+
+        if index != len(self.fields):
             field = self.fields[index]
-            self.bot_text = self.reply_text[field]
-
-            await super().send_message()
+            self.bot_text = self.fields_text[field]
             CLIENT_INFO[self.chat_id].update({"index": index + 1})
+            await super().send_message()
+            return False
 
         else:
-            self.client_data.update({self.fields[index - 1]: self.client_response})
-            CLIENT_INFO[self.chat_id].update({"index": 0})
-            await self.process_input()
-            flag = True
+            index: int = CLIENT_INFO[self.chat_id].get("index") - 1
+            CLIENT_INFO[self.chat_id]["data"].update({self.fields[index]: self.client_response})
 
-        return flag
+            await self.post_process()
+            CLIENT_INFO[self.chat_id].update({"index": 0, "data": {}})
+            self.bot_markup = None
+            await super().send_message()
+            return True
 
-    async def process_input(self) -> bool:
+
+    async def post_process(self) -> bool:
         pass
-
-
 
 
 class ReceiverWithInlineMarkup(ReceiverBasic):

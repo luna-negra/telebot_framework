@@ -1,54 +1,5 @@
 from datetime import datetime
-from telebot.types import (Message, CallbackQuery)
-
-
-class MessageReceiver:
-    """
-    MessageReceiver:
-    this class is charge of receiving message from client.
-
-    THIS IS A TEMPLATE CLASS. DO NOT USE IT DIRECTLY.
-    # Deprecated
-    """
-
-    def __init__(self, message):
-        self.message = message
-        self.request_user = self.message.from_user
-        self.chat_id: int = self.request_user.id
-        self.message_id: int = self.message.id
-        self.timestamp: int = self.message.date
-        self.rcv_datetime: datetime = datetime.fromtimestamp(self.timestamp)
-        self.client_response: str = self.message.text
-
-
-    async def get_message(self):
-        pass
-
-
-class CallBackReceiver:
-    """
-    CallBackReceiver:
-    this class is charge of receiving callback data from client.
-
-    THIS IS A TEMPLATE CLASS. DO NOT USE IT DIRECTLY.
-    # Deprecated
-    """
-
-    def __init__(self, callback):
-        self.callback = callback
-        self.message = self.callback.message
-        self.request_user = self.callback.from_user
-        self.chat_id: int = self.request_user.id
-        self.callback_id: int =self.callback.id
-        self.message_id: int = self.message.id
-        self.timestamp: int = self.message.date
-        self.rcv_datetime: datetime = datetime.fromtimestamp(self.timestamp)
-        self.client_response: str = self.callback.data
-
-
-    async def get_callback(self):
-        pass
-
+from telebot.types import Message
 
 
 class Receiver:
