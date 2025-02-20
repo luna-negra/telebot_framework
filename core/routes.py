@@ -65,24 +65,31 @@ def connector_message(view,
     :return: None
     """
     bot.message_handler(func=lambda message: route_process(types=message,
-                                                           allowed_pre_route=allowed_pre_route),
+                                                           allowed_pre_route=allowed_pre_route,
+                                                           reset_index=False),
                         chat_types=ALLOWED_CHAT_TYPE,
                         **kwargs)(view)
     return None
 
 
-def __check_client_info(chat_id:int) -> dict:
+def __check_client_info(chat_id:int, reset_index:bool) -> dict:
     """
     __check_client_info:
     this method is charge of checking and assigning client info for first access.
     Client needs client information dictionary before using telegram bot.
 
-    :param chat_id: get from route_process
+    :param chat_id: get from route_process.
+    :param reset_index: set bool whether reset index or not.
     :return: None
     """
 
     if CLIENT_INFO.get(chat_id, None) is None:
         CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}, "index": 0, "is_signin": False}})
+
+    else:
+        if reset_index:
+            CLIENT_INFO[chat_id].update({"data": {}, "index": 0})
+
     return CLIENT_INFO[chat_id]
 
 
@@ -116,7 +123,8 @@ def __check_route(client_info:dict, allowed_pre_route:str) -> bool:
 
 def route_process(types,
                   allowed_pre_route:str=None,
-                  callback_data:str=None,) -> bool:
+                  callback_data:str=None,
+                  reset_index:bool=True) -> bool:
     """
     route_process:
     route_process is related with validating callback data or route and assigning route for telebot processes.
@@ -128,11 +136,12 @@ def route_process(types,
     :param types: message or callback
     :param allowed_pre_route:
     :param callback_data:
+    :param reset_index:
     :return:
     """
 
     chat_id: int = types.from_user.id
-    client_info: dict | None = __check_client_info(chat_id=chat_id)
+    client_info: dict | None = __check_client_info(chat_id=chat_id, reset_index=reset_index)
     condition1: bool = __check_route(client_info=client_info, allowed_pre_route=allowed_pre_route)
     condition2: bool = __check_callback(reply=types, callback_data=callback_data)
     return True if condition1 and condition2 else False
