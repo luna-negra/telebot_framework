@@ -1,6 +1,8 @@
 import re
-from telebot.types import ForceReply
+from telebot.types import (ForceReply,
+                           InlineKeyboardMarkup, CallbackQuery)
 from telebot.util import quick_markup
+from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
 from execute import bot
@@ -195,11 +197,12 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         :return:
         """
+
         try:
             if type(self.types) == Message:
                 await bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
 
-        except Exception:
+        except ApiTelegramException:
             pass
 
         return None
@@ -209,3 +212,33 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
     def __init__(self, types, **kwargs):
         super(ReceiverWithInlineMarkup, self).__init__(types=types, **kwargs)
         self.bot_markup = quick_markup(values=kwargs.get("inline_json", {}), row_width=kwargs.get("row_width", 2))
+        self.remove_markup: bool = kwargs.get("remove_markup", True)
+
+    async def send_message(self):
+        if not await self.__remove_markup():
+            await super().send_message()
+
+        return None
+
+    async def __remove_markup(self) -> bool:
+        if type(self.types) == CallbackQuery and self.remove_markup:
+            if self.bot_text is None:
+                await bot.answer_callback_query(callback_query_id=self.callback_id)
+
+                if self.bot_markup is None:
+                    await bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                        message_id=self.message_id,
+                                                        reply_markup=InlineKeyboardMarkup())
+                else:
+                    await bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                        message_id=self.message_id,
+                                                        reply_markup=self.bot_markup)
+                return True
+
+            else:
+                await bot.answer_callback_query(callback_query_id=self.callback_id)
+                await bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                    message_id=self.message_id,
+                                                    reply_markup=InlineKeyboardMarkup())
+
+        return False

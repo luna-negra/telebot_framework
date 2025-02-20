@@ -103,7 +103,7 @@ MENU_COMMANDS: list = [
 # Set the log level
 # default is ERROR
 # possible values: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
-LOG_LEVEL = "ERROR"
+LOG_LEVEL = "DEBUG"
 
 
 ### LOGGING CONFIG END ###
