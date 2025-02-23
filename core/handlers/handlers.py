@@ -1,6 +1,7 @@
 import re
-from telebot.types import (ForceReply,
-                           InlineKeyboardMarkup, CallbackQuery)
+from telebot.types import (CallbackQuery,
+                           ForceReply,
+                           InlineKeyboardMarkup,)
 from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
@@ -35,6 +36,7 @@ class ReceiverBasic(Receiver):
         """
         send_message:
         this method will make bot send message with bot_text to telegram user.
+        or use as a forking point with if-else condition by overriding this method.
 
         :return: None
         """
@@ -80,10 +82,10 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
-            raise ValueError("[ReceiverWithForceReply] 'fields' must be list or tuple")
+            raise ValueError("[ReceiverWithForceReply] 'fields' in Meta class must be list or tuple")
 
         if len(self.fields) == 0:
-            raise AttributeError("[ReceiverWithForceReply] 'fields' must have at least one field name")
+            raise AttributeError("[ReceiverWithForceReply] 'fields' in Meta class must have at least one field name")
 
         self.fields_text = getattr(self.Meta, 'fields_text', {field: field for field in self.fields})
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
@@ -93,7 +95,7 @@ class ReceiverWithForceReply(ReceiverBasic):
         """
         get_client_data:
         This method gets severer inputs from telegram user, referring to the Meta.field.
-        -  send message to telegram user to guide what tetx user must input.
+        -  send message to telegram user to guide what text user must input.
         -  get user input for each field
         -  check the regex with user input.
         -  save relative data in "data" in CLIENT_INFO
@@ -209,36 +211,109 @@ class ReceiverWithForceReply(ReceiverBasic):
 
 
 class ReceiverWithInlineMarkup(ReceiverBasic):
+    """
+    ReceiverWithInlineMarkup:
+    This class will give message with InlineMarkupButton, responding to telegram user's request.
+    This class inherits ReceiverBasic class.
+
+     * remove_markup: bool value to decide to remove InlineMarkupButton after telegram user selection.
+                      default is True.
+
+    Use this class if you need to send several InlineMarkupButtons to telegram user.
+    """
+
+    class Meta:
+        """
+        This class is an inner Meta class for ReceiverWithForceReply.
+
+        * fields: InlineMarkupButton text that show to telegram user.
+        * fields_callback: callback data behind each InlineMarkupButton
+        * fields_url: url string behind each InlineMarkupButton.
+        """
+
+        fields = None
+        fields_callback = None
+        fields_url = None
+
     def __init__(self, types, **kwargs):
         super(ReceiverWithInlineMarkup, self).__init__(types=types, **kwargs)
-        self.bot_markup = quick_markup(values=kwargs.get("inline_json", {}), row_width=kwargs.get("row_width", 2))
         self.remove_markup: bool = kwargs.get("remove_markup", True)
 
-    async def send_message(self):
+        self.fields = getattr(self.Meta, 'fields', ())
+        #if not isinstance(self.fields, (tuple, list)):
+        #    raise ValueError("[ReceiverWithInlineMarkup] 'fields' in Meta class must be list or tuple")
+
+        #if len(self.fields) == 0:
+        #    raise AttributeError("[ReceiverWithInlineMarkup] 'fields' in Meta class must have at least one field name")
+
+        if self.fields is not None:
+            self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
+            self.fields_url = getattr(self.Meta, "fields_url", {field: None for field in self.fields})
+            self.values = {key: {
+                "callback_data": self.fields_callback.get(key),
+                "url": self.fields_url.get(key, None),
+            } for key in self.fields}
+            self.bot_markup = quick_markup(values=self.values, row_width=kwargs.get("row_width", 2))
+
+
+    async def get_client_data(self) -> None:
+        """
+        get_client_data:
+        This method is responsible to send message with InlineMarkupButton.
+
+        :return: None
+        """
+
         if not await self.__remove_markup():
             await super().send_message()
 
         return None
 
-    async def __remove_markup(self) -> bool:
-        if type(self.types) == CallbackQuery and self.remove_markup:
-            if self.bot_text is None:
-                await bot.answer_callback_query(callback_query_id=self.callback_id)
 
-                if self.bot_markup is None:
+    async def post_process(self):
+        """
+        post_process:
+        This method is charge of processing user input saved in CLIENT_INFO[self.chat_id]["data"]
+        Developer must override this method for post job. for example: API Calling
+
+        :return:
+        """
+        pass
+
+
+    async def __remove_markup(self) -> bool:
+        """
+        __remove_markup:
+        This method decides whether it remove InlineMarkupButton after user selection.
+
+        :return: bool
+        """
+
+        if type(self.types) == CallbackQuery and self.remove_markup:
+            # send user's selection to telegram bot.
+            await bot.answer_callback_query(callback_query_id=self.callback_id)
+
+            # if self.bot_text is None, remove previous buttons and pop up new Button on where previous button existed.
+            if self.bot_text is None:
+                await bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                    message_id=self.message_id,
+                                                    reply_markup=self.bot_markup or InlineKeyboardMarkup())
+                return True
+
+            # if self.bot_text is not None, remove previous buttons and add message with bot_text and new buttons.
+            else:
+                # remove previous bot message
+                await bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+
+                # edit answer_callback_query with new markup.
+                try:
                     await bot.edit_message_reply_markup(chat_id=self.chat_id,
                                                         message_id=self.message_id,
                                                         reply_markup=InlineKeyboardMarkup())
-                else:
-                    await bot.edit_message_reply_markup(chat_id=self.chat_id,
-                                                        message_id=self.message_id,
-                                                        reply_markup=self.bot_markup)
-                return True
 
-            else:
-                await bot.answer_callback_query(callback_query_id=self.callback_id)
-                await bot.edit_message_reply_markup(chat_id=self.chat_id,
-                                                    message_id=self.message_id,
-                                                    reply_markup=InlineKeyboardMarkup())
+                # if there is no answer_callback_query, will send default self.bot_text and self.markup in this class.
+                # e.g) if a method in views.py is called manually so that there is no callback information,
+                except ApiTelegramException:
+                    pass
 
         return False
