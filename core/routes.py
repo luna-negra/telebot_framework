@@ -125,7 +125,7 @@ def __check_route(client_info:dict, allowed_pre_route:str|list|tuple|None) -> bo
     if isinstance(allowed_pre_route, str):
         allowed_pre_route = allowed_pre_route.replace(" ", "").split(",")
 
-    return client_route == allowed_pre_route if allowed_pre_route is not None else True
+    return client_route in allowed_pre_route if allowed_pre_route is not None else True
 
 
 def route_process(types,
