@@ -8,8 +8,8 @@ CLIENT_INFO: dict = {}
 
 
 def connector_callback(view,
-                       callback_data:str=None,
-                       allowed_pre_route:str=None,
+                       callback_data:str|list|tuple|None=None,
+                       allowed_pre_route:str|list|tuple|None=None,
                        **kwargs) -> None:
     """
     connector_callback:
@@ -17,7 +17,7 @@ def connector_callback(view,
 
     :param view: function class that you want to map with specific route
     :param allowed_pre_route: route that the client can access.
-    :param callback_data: set the callback data to response with InlineKeyboardButton
+    :param callback_data: set the callback data in list to response with InlineKeyboardButton
     :param kwargs:
     :return:
     """
@@ -30,8 +30,8 @@ def connector_callback(view,
 
 
 def connector_command(view,
-                      commands:list=["start"],
-                      allowed_pre_route:str=None,
+                      commands:str|list|tuple="start",
+                      allowed_pre_route:str|list|tuple|None=None,
                       **kwargs) -> None:
     """
     connector_command:
@@ -44,7 +44,7 @@ def connector_command(view,
     :return:
     """
 
-    bot.message_handler(commands=commands,
+    bot.message_handler(commands=commands.replace(" ", "").split(",") if isinstance(commands, str) else commands,
                         func=lambda message: route_process(types=message,
                                                            allowed_pre_route=allowed_pre_route),
                         chat_types=ALLOWED_CHAT_TYPE,
@@ -53,7 +53,7 @@ def connector_command(view,
 
 
 def connector_message(view,
-                      allowed_pre_route:str=None,
+                      allowed_pre_route:str|list|tuple|None=None,
                       **kwargs) -> None:
     """
     connector_message:
@@ -93,7 +93,7 @@ def __check_client_info(chat_id:int, reset_index:bool) -> dict:
     return CLIENT_INFO[chat_id]
 
 
-def __check_callback(reply, callback_data:str) -> bool:
+def __check_callback(reply, callback_data:str|list|tuple|None) -> bool:
     """
     __check_callback:
     this method is charge of checking callback data during callback processes.
@@ -103,10 +103,14 @@ def __check_callback(reply, callback_data:str) -> bool:
     :param callback_data: get from route_process
     :return: bool
     """
-    return reply.data == callback_data if callback_data is not None else True
+
+    if isinstance(callback_data, str):
+        callback_data = callback_data.replace(" ", "").split(",")
+
+    return reply.data in callback_data if callback_data is not None else True
 
 
-def __check_route(client_info:dict, allowed_pre_route:str) -> bool:
+def __check_route(client_info:dict, allowed_pre_route:str|list|tuple|None) -> bool:
     """
     __check_route:
     this method is charge of checking allowed route during executing telebot processes.
@@ -118,12 +122,15 @@ def __check_route(client_info:dict, allowed_pre_route:str) -> bool:
     """
 
     client_route: str | None = client_info.get("route", None) if client_info is not None else None
+    if isinstance(allowed_pre_route, str):
+        allowed_pre_route = allowed_pre_route.replace(" ", "").split(",")
+
     return client_route == allowed_pre_route if allowed_pre_route is not None else True
 
 
 def route_process(types,
-                  allowed_pre_route:str=None,
-                  callback_data:str=None,
+                  allowed_pre_route:str|list|tuple|None=None,
+                  callback_data:str|list|tuple|None=None,
                   reset_index:bool=True) -> bool:
     """
     route_process:
