@@ -1,5 +1,6 @@
 from datetime import datetime
 from telebot.types import Message
+from execute import bot
 
 
 class Receiver:
@@ -23,6 +24,7 @@ class Receiver:
 
     def __init__(self, types):
         self.types = types
+        self.bot = bot
         self.request_user = self.types.from_user
         self.chat_id = self.types.from_user.id
         self.callback_id: int = None if type(self.types) == Message else self.types.id

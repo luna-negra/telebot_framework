@@ -6,7 +6,6 @@ from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
-from execute import bot
 
 
 class ReceiverBasic(Receiver):
@@ -40,9 +39,9 @@ class ReceiverBasic(Receiver):
 
         :return: None
         """
-        await bot.send_message(chat_id=self.chat_id,
-                               text=self.bot_text,
-                               reply_markup=self.bot_markup)
+        await self.bot.send_message(chat_id=self.chat_id,
+                                    text=self.bot_text,
+                                    reply_markup=self.bot_markup)
         return None
 
 
@@ -202,7 +201,15 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         try:
             if type(self.types) == Message:
-                await bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 1)
+
+            else:
+                await self.bot.answer_callback_query(callback_query_id=self.types.id)
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+                await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                         message_id=self.message_id,
+                                                         reply_markup=InlineKeyboardMarkup())
 
         except ApiTelegramException:
             pass
@@ -250,7 +257,7 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
             self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
             self.fields_url = getattr(self.Meta, "fields_url", {field: None for field in self.fields})
             self.values = {key: {
-                "callback_data": self.fields_callback.get(key),
+                "callback_data": self.fields_callback.get(key, key.lower().replace(" ", "_")),
                 "url": self.fields_url.get(key, None),
             } for key in self.fields}
             self.bot_markup = quick_markup(values=self.values, row_width=kwargs.get("row_width", 2))
@@ -291,11 +298,11 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
 
         if type(self.types) == CallbackQuery and self.remove_markup:
             # send user's selection to telegram bot.
-            await bot.answer_callback_query(callback_query_id=self.callback_id)
+            await self.bot.answer_callback_query(callback_query_id=self.callback_id)
 
             # if self.bot_text is None, remove previous buttons and pop up new Button on where previous button existed.
             if self.bot_text is None:
-                await bot.edit_message_reply_markup(chat_id=self.chat_id,
+                await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
                                                     message_id=self.message_id,
                                                     reply_markup=self.bot_markup or InlineKeyboardMarkup())
                 return True
@@ -303,11 +310,11 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
             # if self.bot_text is not None, remove previous buttons and add message with bot_text and new buttons.
             else:
                 # remove previous bot message
-                await bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
 
                 # edit answer_callback_query with new markup.
                 try:
-                    await bot.edit_message_reply_markup(chat_id=self.chat_id,
+                    await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
                                                         message_id=self.message_id,
                                                         reply_markup=InlineKeyboardMarkup())
 
