@@ -256,18 +256,18 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
             self.bot_markup = quick_markup(values=self.values, row_width=kwargs.get("row_width", 2))
 
 
-    async def get_client_data(self) -> None:
+    async def get_client_data(self) -> any:
         """
         get_client_data:
         This method is responsible to send message with InlineMarkupButton.
 
-        :return: None
+        :return: any
         """
 
         if not await self.__remove_markup():
             await super().send_message()
 
-        return None
+        return await self.post_process()
 
 
     async def post_process(self):
