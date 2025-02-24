@@ -6,6 +6,7 @@ from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
+from core.config import SECRET_MODE
 
 
 class ReceiverBasic(Receiver):
@@ -18,7 +19,7 @@ class ReceiverBasic(Receiver):
     :kwargs:
       - bot_text: content text contained in message that the bot will send to telegram user. Default is None
       - bot_markup: markup contained in message that the bot will send to telegram user. Default is None.
-      - remove_prev_msg: bool value to decide to remove previous all messages in chat room. Default is True(remove)
+      - remove_prev_msg: bool value to decide to remove previous all bot messages in chat room. Default is True(remove)
       - route: set the telegram user's route in your bot application.
 
     Use this class when you need to get a telegram user's request and just send a simple message with overriding send_message()
@@ -28,7 +29,7 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
-        self.remove_prev_msg = kwargs.get("remove_prev_msg", True)
+        self.remove_prev_msg = kwargs.get("remove_prev_msg", SECRET_MODE)
         self.route = kwargs.get("route", None)
         if self.route is not None:
             CLIENT_INFO[self.chat_id].update({"route": self.route})
@@ -52,6 +53,9 @@ class ReceiverBasic(Receiver):
         """
         _remove_prev_message:
         This method decides whether it remove previous messages including InlineMarkup after user selection.
+
+        if self.remove == True: remove all bots messages and user messages.
+        else:                   remove all user messages(with text) only.
 
         :return: bool
         """
@@ -84,6 +88,15 @@ class ReceiverBasic(Receiver):
 
             else:
                 await self.__remove_messages()
+
+        else:
+            if type(self.types) == Message:
+                try:
+                    await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+
+                except ApiTelegramException:
+                    pass
+
 
         return None
 
