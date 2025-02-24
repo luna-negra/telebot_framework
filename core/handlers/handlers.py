@@ -18,6 +18,7 @@ class ReceiverBasic(Receiver):
     :kwargs:
       - bot_text: content text contained in message that the bot will send to telegram user. Default is None
       - bot_markup: markup contained in message that the bot will send to telegram user. Default is None.
+      - remove_prev_msg: bool value to decide to remove previous all messages in chat room. Default is True(remove)
       - route: set the telegram user's route in your bot application.
 
     Use this class when you need to get a telegram user's request and just send a simple message with overriding send_message()
@@ -27,6 +28,7 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
+        self.remove_prev_msg = kwargs.get("remove_prev_msg", True)
         self.route = kwargs.get("route", None)
         if self.route is not None:
             CLIENT_INFO[self.chat_id].update({"route": self.route})
@@ -39,9 +41,68 @@ class ReceiverBasic(Receiver):
 
         :return: None
         """
+
+        await self._remove_prev_message()
         await self.bot.send_message(chat_id=self.chat_id,
                                     text=self.bot_text,
                                     reply_markup=self.bot_markup)
+        return None
+
+    async def _remove_prev_message(self) -> None:
+        """
+        _remove_prev_message:
+        This method decides whether it remove previous messages including InlineMarkup after user selection.
+
+        :return: bool
+        """
+
+        if self.remove_prev_msg:
+            if type(self.types) == CallbackQuery:
+                # send user's selection to telegram bot.
+                await self.bot.answer_callback_query(callback_query_id=self.callback_id)
+
+                # if self.bot_text is None, remove previous buttons and pop up new Button on where previous button existed.
+                if self.bot_text is None:
+                    await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                        message_id=self.message_id,
+                                                        reply_markup=self.bot_markup or InlineKeyboardMarkup())
+
+                # if self.bot_text is not None, remove previous buttons and add message with bot_text and new buttons.
+                else:
+                    await self.__remove_messages()
+
+                    # edit answer_callback_query with new markup.
+                    try:
+                        await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
+                                                            message_id=self.message_id,
+                                                            reply_markup=self.bot_markup or InlineKeyboardMarkup())
+
+                    # if there is no answer_callback_query, will send default self.bot_text and self.markup in this class.
+                    # e.g: if a method in views.py is called manually so that there is no callback information,
+                    except ApiTelegramException:
+                        pass
+
+            else:
+                await self.__remove_messages()
+
+        return None
+
+    async def __remove_messages(self) -> None:
+        """
+        __remove_messages:
+        this method is charge of only removing previous 3 messages left on chat room.
+
+        :return:
+        """
+        try:
+            # remove previous bot message
+            await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+            await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 1)
+            await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 2)
+
+        except ApiTelegramException:
+            pass
+
         return None
 
 
@@ -50,8 +111,6 @@ class ReceiverWithForceReply(ReceiverBasic):
     ReceiverWithForceReply:
     This class will give ForceReply markup message, responding to telegram user's request.
     This class inherits ReceiverBasic class.
-
-    * remove_message: bool value to decide to remove user's message or not, after user request. Default is True(remove)
 
     Use this class when you need to get several user's input consecutively. for example,
     - 'Sign in' requires username and password from user.
@@ -75,7 +134,6 @@ class ReceiverWithForceReply(ReceiverBasic):
 
     def __init__(self, types, **kwargs):
         super(ReceiverWithForceReply, self).__init__(types=types, **kwargs)
-        self.remove_message: bool = kwargs.get("remove_message", True)
         self.client_data = CLIENT_INFO[self.chat_id]["data"]
         self.bot_markup = ForceReply()
 
@@ -174,6 +232,7 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         :return:
         """
+
         pass
 
     async def send_message(self) -> None:
@@ -185,35 +244,7 @@ class ReceiverWithForceReply(ReceiverBasic):
         :return: None
         """
 
-        if self.remove_message:
-            await self.__remove_client_message()
-
         await super().send_message()
-        return None
-
-    async def __remove_client_message(self):
-        """
-        __remove_client_message:
-        This method decides whether it remove users message or not.
-
-        :return:
-        """
-
-        try:
-            if type(self.types) == Message:
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 1)
-
-            else:
-                await self.bot.answer_callback_query(callback_query_id=self.types.id)
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
-                await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
-                                                         message_id=self.message_id,
-                                                         reply_markup=InlineKeyboardMarkup())
-
-        except ApiTelegramException:
-            pass
-
         return None
 
 
@@ -222,9 +253,6 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
     ReceiverWithInlineMarkup:
     This class will give message with InlineMarkupButton, responding to telegram user's request.
     This class inherits ReceiverBasic class.
-
-     * remove_markup: bool value to decide to remove InlineMarkupButton after telegram user selection.
-                      default is True.
 
     Use this class if you need to send several InlineMarkupButtons to telegram user.
     """
@@ -244,14 +272,15 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
 
     def __init__(self, types, **kwargs):
         super(ReceiverWithInlineMarkup, self).__init__(types=types, **kwargs)
-        self.remove_markup: bool = kwargs.get("remove_markup", True)
-
         self.fields = getattr(self.Meta, 'fields', ())
-        #if not isinstance(self.fields, (tuple, list)):
-        #    raise ValueError("[ReceiverWithInlineMarkup] 'fields' in Meta class must be list or tuple")
 
-        #if len(self.fields) == 0:
-        #    raise AttributeError("[ReceiverWithInlineMarkup] 'fields' in Meta class must have at least one field name")
+        """
+        if not isinstance(self.fields, (tuple, list)):
+            raise ValueError("[ReceiverWithInlineMarkup] 'fields' in Meta class must be list or tuple")
+
+        if len(self.fields) == 0:
+            raise AttributeError("[ReceiverWithInlineMarkup] 'fields' in Meta class must have at least one field name")
+        """
 
         if self.fields is not None:
             self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
@@ -262,7 +291,6 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
             } for key in self.fields}
             self.bot_markup = quick_markup(values=self.values, row_width=kwargs.get("row_width", 2))
 
-
     async def get_client_data(self) -> any:
         """
         get_client_data:
@@ -271,11 +299,8 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
         :return: any
         """
 
-        if not await self.__remove_markup():
-            await super().send_message()
-
+        await super().send_message()
         return await self.post_process()
-
 
     async def post_process(self):
         """
@@ -285,42 +310,5 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
 
         :return:
         """
+
         pass
-
-
-    async def __remove_markup(self) -> bool:
-        """
-        __remove_markup:
-        This method decides whether it remove InlineMarkupButton after user selection.
-
-        :return: bool
-        """
-
-        if type(self.types) == CallbackQuery and self.remove_markup:
-            # send user's selection to telegram bot.
-            await self.bot.answer_callback_query(callback_query_id=self.callback_id)
-
-            # if self.bot_text is None, remove previous buttons and pop up new Button on where previous button existed.
-            if self.bot_text is None:
-                await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
-                                                    message_id=self.message_id,
-                                                    reply_markup=self.bot_markup or InlineKeyboardMarkup())
-                return True
-
-            # if self.bot_text is not None, remove previous buttons and add message with bot_text and new buttons.
-            else:
-                # remove previous bot message
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
-
-                # edit answer_callback_query with new markup.
-                try:
-                    await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
-                                                        message_id=self.message_id,
-                                                        reply_markup=InlineKeyboardMarkup())
-
-                # if there is no answer_callback_query, will send default self.bot_text and self.markup in this class.
-                # e.g) if a method in views.py is called manually so that there is no callback information,
-                except ApiTelegramException:
-                    pass
-
-        return False

@@ -1,6 +1,6 @@
 from core.handlers.handlers import (ReceiverBasic,
-                                    ReceiverWithForceReply,)
-from core.routes import CLIENT_INFO
+                                    ReceiverWithForceReply,
+                                    CLIENT_INFO)
 
 
 class SignInBasic(ReceiverWithForceReply):
@@ -8,10 +8,10 @@ class SignInBasic(ReceiverWithForceReply):
         fields = ["email", "password"]
         fields_text = {
             "email": "[Sign In]\n* Input Email",
-            "password": "* Input Password",
+            "password": "[Sign In]\n* Input Password",
         }
         fields_regex = {
-            "email": "^.*@.*\\..*$",
+            "email": "^.+@.+\\..+$",
         }
         fields_error_msg = {
             "email": "Not an Email Format",
@@ -51,11 +51,11 @@ class SignUp(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
         fields_text = {
-            "email": "[Sing In]\n* Input Email",
-            "password": "* Input Password",
+            "email": "[Sign Up]\n* Input Email",
+            "password": "[Sign Up]\n* Input Password",
         }
         fields_regex = {
-            "email": ("^.*@.*\\..*$", "^.*@.*\\.com"),
+            "email": ("^.*@.+\\..+$", "^.+@.+\\.com"),
             "password": (
                 "[A-Z]+",
                 "[a-z]+",
