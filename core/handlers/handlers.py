@@ -71,33 +71,7 @@ class ReceiverBasic(Receiver):
                                                          reply_markup=self.bot_markup or InlineKeyboardMarkup())
                 return False
 
-            if SECRET_MODE:
-                # remove previous message with bot_text and new buttons.
-                await self.__remove_messages()
-
-                # edit answer_callback_query with new markup.
-                try:
-                    await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
-                                                        message_id=self.message_id,
-                                                        reply_markup=self.bot_markup or InlineKeyboardMarkup())
-
-                # if there is no answer_callback_query, will send default self.bot_text and self.markup in this class.
-                # e.g: if a method in views.py is called manually so that there is no callback information,
-                except ApiTelegramException:
-                    pass
-
-        elif type(self.types) == Message:
-            if SECRET_MODE:
-                await self.__remove_messages()
-
-            else:
-                if self.remove_user_msg:
-                    try:
-                        await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
-
-                    except ApiTelegramException:
-                        pass
-
+        await self.__remove_messages()
         return True
 
     async def __remove_messages(self) -> None:
@@ -108,10 +82,15 @@ class ReceiverBasic(Receiver):
         :return:
         """
         try:
-            # remove previous bot message
-            await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
-            await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 1)
-            await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 2)
+            # remove previous bot message if SECRET_MODE is True
+            if SECRET_MODE:
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 1)
+                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 2)
+
+            else:
+                if self.remove_user_msg:
+                    await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
 
         except ApiTelegramException:
             pass
