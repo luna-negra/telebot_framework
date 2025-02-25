@@ -19,7 +19,7 @@ class ReceiverBasic(Receiver):
     :kwargs:
       - bot_text: content text contained in message that the bot will send to telegram user. Default is None
       - bot_markup: markup contained in message that the bot will send to telegram user. Default is None.
-      - remove_prev_msg: bool value to decide to remove previous all bot messages in chat room. Default is True(remove)
+      - remove_user_msg: bool value to decide to remove previous all user messages in chat room. Default is True(remove)
       - route: set the telegram user's route in your bot application.
 
     Use this class when you need to get a telegram user's request and just send a simple message with overriding send_message()
@@ -29,7 +29,7 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
-        self.remove_prev_msg = kwargs.get("remove_prev_msg", SECRET_MODE)
+        self.remove_user_msg = kwargs.get("remove_prev_msg", True)
         self.route = kwargs.get("route", None)
         if self.route is not None:
             CLIENT_INFO[self.chat_id].update({"route": self.route})
@@ -43,13 +43,13 @@ class ReceiverBasic(Receiver):
         :return: None
         """
 
-        await self._remove_prev_message()
-        await self.bot.send_message(chat_id=self.chat_id,
-                                    text=self.bot_text,
-                                    reply_markup=self.bot_markup)
+        if await self._remove_prev_message():
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=self.bot_text,
+                                        reply_markup=self.bot_markup)
         return None
 
-    async def _remove_prev_message(self) -> None:
+    async def _remove_prev_message(self) -> bool:
         """
         _remove_prev_message:
         This method decides whether it remove previous messages including InlineMarkup after user selection.
@@ -60,7 +60,7 @@ class ReceiverBasic(Receiver):
         :return: bool
         """
 
-        if self.remove_prev_msg:
+        if SECRET_MODE:
             if type(self.types) == CallbackQuery:
                 # send user's selection to telegram bot.
                 await self.bot.answer_callback_query(callback_query_id=self.callback_id)
@@ -70,6 +70,9 @@ class ReceiverBasic(Receiver):
                     await self.bot.edit_message_reply_markup(chat_id=self.chat_id,
                                                         message_id=self.message_id,
                                                         reply_markup=self.bot_markup or InlineKeyboardMarkup())
+
+                    # return False not to send any message but change the previous InlineMarkupButton.
+                    return False
 
                 # if self.bot_text is not None, remove previous buttons and add message with bot_text and new buttons.
                 else:
@@ -86,19 +89,19 @@ class ReceiverBasic(Receiver):
                     except ApiTelegramException:
                         pass
 
+            # Response with Message Input.
             else:
                 await self.__remove_messages()
 
         else:
-            if type(self.types) == Message:
+            if self.remove_user_msg and type(self.types) == Message:
                 try:
                     await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
 
                 except ApiTelegramException:
                     pass
 
-
-        return None
+        return True
 
     async def __remove_messages(self) -> None:
         """

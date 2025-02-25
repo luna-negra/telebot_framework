@@ -98,9 +98,8 @@ MENU_COMMANDS: list = [
 
 # Set chatting mode for your bot.
 # SECRET_MODE is a bool variable that decides whether the previous messages will be removed or not.
-# default is True
-# refer to 'remove_prev_msg' on core.handlers.handlers.ReceiverBasic.
-SECRET_MODE: bool = False
+# if True, bot will remove all remained messages in chat room after user types messages or click InlineMarkupButton
+SECRET_MODE: bool = True
 
 
 ### TELEGRAM BOT CONFIG END ###
