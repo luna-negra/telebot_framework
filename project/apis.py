@@ -1,4 +1,5 @@
-from project.serializers import *
+import requests
+import json
 
 
 # please write down your code below.
