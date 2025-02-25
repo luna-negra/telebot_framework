@@ -1,7 +1,4 @@
 import re
-from telebot.types import (CallbackQuery,
-                           ForceReply,
-                           InlineKeyboardMarkup,)
 from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
