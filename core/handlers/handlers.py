@@ -262,7 +262,8 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
 
     def __init__(self, types, **kwargs):
         super(ReceiverWithInlineMarkup, self).__init__(types=types, **kwargs)
-        self.fields = getattr(self.Meta, 'fields', ())
+        self.fields: list|tuple = getattr(self.Meta, 'fields', ())
+        self.row_width: int = kwargs.get("row_width", 2)
 
         if self.fields is not None:
             self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
@@ -271,7 +272,7 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
                 "callback_data": self.fields_callback.get(key, key.lower().replace(" ", "_")),
                 "url": self.fields_url.get(key, None),
             } for key in self.fields}
-            self.bot_markup = quick_markup(values=self.values, row_width=kwargs.get("row_width", 2))
+            self.bot_markup = quick_markup(values=self.values, row_width=self.row_width)
 
     async def get_client_data(self) -> any:
         """
@@ -338,3 +339,31 @@ class ResultShowingWithInlineMarkup(ReceiverWithInlineMarkup):
         await self.pre_process()
         await super().send_message()
         return None
+
+
+class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
+
+    def __init__(self, types, basic_route:str, parent_route:str, num_in_page:int=6, **kwargs):
+        super(ReceiverWithInlineMarkupPagination, self).__init__(types, **kwargs)
+
+        self.page = CLIENT_INFO[self.chat_id].get("page")
+        self.num_in_page = num_in_page
+        start_idx = self.page * self.num_in_page
+        end_idx = start_idx + self.num_in_page
+        total_page = int(len(self.fields) / self.num_in_page)
+
+        key_list = list(self.values.keys())[start_idx:end_idx]
+        self.values = {k:self.values[k] for k in key_list}
+        self.bot_markup = quick_markup(values=self.values, row_width=self.row_width)
+
+        # Additional Buttons.
+        self.bot_markup.add(InlineKeyboardButton(text="Cancel", callback_data=f"{parent_route}"))
+        if 0 < self.page < total_page:
+            self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"),
+                                InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
+
+        elif self.page == total_page:
+            self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"))
+
+        elif self.page == 0:
+            self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))

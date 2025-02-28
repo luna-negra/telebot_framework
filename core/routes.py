@@ -64,6 +64,7 @@ def connector_message(view,
     :param kwargs:
     :return: None
     """
+
     bot.message_handler(func=lambda message: route_process(types=message,
                                                            allowed_pre_route=allowed_pre_route,
                                                            reset_index=False),
@@ -84,7 +85,7 @@ def __check_client_info(chat_id:int, reset_index:bool) -> dict:
     """
 
     if CLIENT_INFO.get(chat_id, None) is None:
-        CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}, "index": 0, "is_signin": False}})
+        CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}, "index": 0, "page": 0, "is_signin": False}})
 
     else:
         if reset_index:
@@ -106,6 +107,23 @@ def __check_callback(reply, callback_data:str|list|tuple|None) -> bool:
 
     if isinstance(callback_data, str):
         callback_data = callback_data.replace(" ", "").split(",")
+
+    if getattr(reply, "data", None):
+        if reply.data.endswith(("__>", "__<")):
+            reply_data = reply.data.split("__")
+            data = reply_data[0]
+            symbol = reply_data[1]
+            if callback_data is not None and data in callback_data:
+                page = CLIENT_INFO[reply.from_user.id].get("page")
+                if symbol == ">":
+                    CLIENT_INFO[reply.from_user.id].update({"page": page + 1})
+
+                elif symbol == "<":
+                    CLIENT_INFO[reply.from_user.id].update({"page": page - 1})
+
+            return data in callback_data if callback_data is not None else True
+
+        CLIENT_INFO[reply.from_user.id].update({"page": 0})
 
     return reply.data in callback_data if callback_data is not None else True
 
