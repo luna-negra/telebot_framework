@@ -5,9 +5,6 @@ from core.handlers import *
 from core.routes import CLIENT_INFO
 from core.config import SECRET_MODE
 
-# test
-from telebot.types import InlineKeyboardButton
-
 
 class ReceiverBasic(Receiver):
     """
