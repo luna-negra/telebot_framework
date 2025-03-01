@@ -358,12 +358,13 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
 
         # Additional Buttons.
         self.bot_markup.add(InlineKeyboardButton(text="Cancel", callback_data=f"{parent_route}"))
-        if 0 < self.page < total_page:
-            self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"),
-                                InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
+        if total_page != 0:
+            if 0 < self.page < total_page:
+                self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"),
+                                    InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
 
-        elif self.page == total_page:
-            self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"))
+            elif self.page == total_page:
+                self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"))
 
-        elif self.page == 0:
-            self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
+            elif self.page == 0:
+                self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
