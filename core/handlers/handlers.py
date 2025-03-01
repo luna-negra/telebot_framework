@@ -342,6 +342,17 @@ class ResultShowingWithInlineMarkup(ReceiverWithInlineMarkup):
 
 
 class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
+    """
+    ReceiverWithInlineMarkupPagination:
+
+    If you want to create a plenty of InlineKeyboard Buttons and need pagination, use this class.
+    this class will provide page moving button at the below of buttons.
+
+    * basic route: set the route after clicking '<' or '>' button.
+    * parent_route: set the route after clicking 'Cancel' button.
+    * num_in_page: set the number of buttons in one page.
+
+    """
 
     def __init__(self, types, basic_route:str, parent_route:str, num_in_page:int=6, **kwargs):
         super(ReceiverWithInlineMarkupPagination, self).__init__(types, **kwargs)
@@ -358,12 +369,13 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
 
         # Additional Buttons.
         self.bot_markup.add(InlineKeyboardButton(text="Cancel", callback_data=f"{parent_route}"))
-        if 0 < self.page < total_page:
-            self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"),
-                                InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
+        if total_page != 0:
+            if 0 < self.page < total_page:
+                self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"),
+                                    InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
 
-        elif self.page == total_page:
-            self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"))
+            elif self.page == total_page:
+                self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"))
 
-        elif self.page == 0:
-            self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
+            elif self.page == 0:
+                self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
