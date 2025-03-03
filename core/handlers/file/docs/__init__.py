@@ -50,7 +50,7 @@ class ReceiverWithDocs(ResultShowingWithInlineMarkup):
 
 class ReceiverWithCSVFile(ReceiverWithDocs):
     async def validate_file(self) -> None:
-        if not self.file_type == "text/csv":
+        if not self.file_type == "text/comma-separated-values":
             raise ValueError(f"[ERROR] File must be a CSV. You uploaded '{self.file_type}'")
 
         return None
@@ -82,7 +82,7 @@ class ReceiverWithPDFFile(ReceiverWithDocs):
 
 class ReceiverWithTextFile(ReceiverWithDocs):
     async def validate_file(self) -> None:
-        if not self.file_type == "text/file":
+        if not self.file_type == "text/plain":
             raise ValueError(f"[ERROR] File must be a text. You uploaded '{self.file_type}'")
 
         return None

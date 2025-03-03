@@ -12,7 +12,7 @@ class ReceiverWithExcelFile(ReceiverWithDocs):
 
 class ReceiverWithPPTFile(ReceiverWithDocs):
     async def validate_file(self):
-        if not self.file_type == "application / vnd.openxmlformats - officedocument.presentationml.presentation":
+        if not self.file_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation":
             raise ValueError(f"[ERROR] File must be an PPT. You uploaded '{self.file_type}'")
 
 
