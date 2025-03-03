@@ -1,3 +1,4 @@
+from pathlib import Path
 from core.handlers.handlers import (ReceiverBasic,
                                     ResultShowingWithInlineMarkup,
                                     CLIENT_INFO)
@@ -112,5 +113,29 @@ class ReceiverWithZipFile(ReceiverWithDocs):
         return None
 
 
-class SenderWithDocs(ReceiverBasic):
-    pass
+class SenderWithDocs(ResultShowingWithInlineMarkup):
+    def __init__(self, types, rel_filepath:str, **kwargs):
+        self.rel_filepath = rel_filepath
+        self.filepath = None
+
+        for path in Path("file_storage").rglob(pattern=f"{rel_filepath}"):
+            if path.is_file():
+                self.filepath = path
+
+        super(SenderWithDocs, self).__init__(types=types, **kwargs)
+
+    async def send_message(self):
+        if self.filepath is None:
+            self.bot_text = f"[Error] File '{self.rel_filepath.split("/")[-1]}' does not exist on file_storage"
+            await super().send_message()
+            return None
+
+        tmp = self.bot_markup
+        self.bot_markup = None
+        await super().send_message()
+        with open(self.filepath, mode="rb") as file:
+            await self.bot.send_document(chat_id=self.chat_id,
+                                         document=file,
+                                         reply_markup=tmp)
+
+        return None
