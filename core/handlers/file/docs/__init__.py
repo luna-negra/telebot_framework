@@ -1,6 +1,8 @@
 from pathlib import Path
+from core.config import FILE_STORAGE_FOLDER
 from core.handlers.handlers import (ResultShowingWithInlineMarkup,
                                     CLIENT_INFO)
+
 
 
 class ReceiverWithDocs(ResultShowingWithInlineMarkup):
@@ -200,14 +202,29 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
     """
 
     def __init__(self, types, rel_filepath:str, **kwargs):
-        self.rel_filepath = rel_filepath
         self.filepath = None
-
-        for path in Path("file_storage").rglob(pattern=f"{rel_filepath}"):
-            if path.is_file():
-                self.filepath = path
-
+        self.rel_filepath = rel_filepath
+        self.root_storage = FILE_STORAGE_FOLDER
         super(SenderWithDocs, self).__init__(types=types, **kwargs)
+
+
+    async def create_file(self, content) -> None:
+        # add logic to create a non exist folder
+
+        with open(f"{self.root_storage}/{self.rel_filepath}", mode="w", encoding="utf-8") as file:
+            file.write(str(content))
+
+        return None
+
+
+    async def pre_process(self):
+        """
+        create a file on file_storage folder by overriding this method with self.create_file()
+
+        :return:
+        """
+
+        pass
 
     async def send_message(self):
         """
@@ -215,6 +232,12 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
 
         :return:
         """
+
+        await self.pre_process()
+        for path in Path(self.root_storage).rglob(f"*{self.rel_filepath}"):
+            if path.is_file():
+                self.filepath = f"{FILE_STORAGE_FOLDER}/{self.rel_filepath}"
+                break
 
         if self.filepath is None:
             self.bot_text = f"[Error] File '{self.rel_filepath.split("/")[-1]}' does not exist on file_storage"
@@ -228,5 +251,9 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
             await self.bot.send_document(chat_id=self.chat_id,
                                          document=file,
                                          reply_markup=tmp)
+
+        return None
+
+    async def __get_file(self) -> None:
 
         return None
