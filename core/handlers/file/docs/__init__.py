@@ -1,5 +1,6 @@
-from pathlib import Path
-from core.config import FILE_STORAGE_FOLDER
+from os.path import exists
+from shutil import rmtree
+from os import makedirs
 from core.handlers.handlers import (ResultShowingWithInlineMarkup,
                                     CLIENT_INFO)
 
@@ -198,33 +199,50 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
     SenderWithDocs:
 
     this class is charge of sending file from bot to user.
-    file must be placed in specific folder(file_storage)  before being sent.
+    this class receives the data which would be written in document or file,
+    and convert data into the string content for download file.
+
+    the bot will send created file to telegram user.
+    please use it to create analysis report or summary after collecting data.
     """
 
-    def __init__(self, types, rel_filepath:str, **kwargs):
-        self.filepath = None
-        self.rel_filepath = rel_filepath
-        self.root_storage = FILE_STORAGE_FOLDER
-        super(SenderWithDocs, self).__init__(types=types, **kwargs)
+    FILE_STORAGE_FOLDER: str = "core/tmp_storage"
 
+    def __init__(self, types, filename:str, **kwargs):
+        super(SenderWithDocs, self).__init__(types=types, **kwargs)
+        self.filename = filename
+        self.filepath = f"{SenderWithDocs.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
 
     async def create_file(self, content) -> None:
-        # add logic to create a non exist folder
+        """
+        this method is charge of producing download file with content from pre_process.
+        please use it at the end of pre_process() method.
+        you can insert your own logic in pre_process without using this method to create a file.
 
-        with open(f"{self.root_storage}/{self.rel_filepath}", mode="w", encoding="utf-8") as file:
-            file.write(str(content))
+        :param content: content that you would like to write in a file.
+        :return:
+        """
+
+        while True:
+            try:
+                with open(self.filepath, mode="w", encoding="utf-8") as file:
+                    file.write(str(content))
+                    break
+
+            except FileNotFoundError:
+                makedirs(name="/".join(self.filepath.split("/")[:-1]), exist_ok=True)
 
         return None
 
 
-    async def pre_process(self):
+    async def pre_process(self) -> None:
         """
         create a file on file_storage folder by overriding this method with self.create_file()
 
         :return:
         """
 
-        pass
+        return None
 
     async def send_message(self):
         """
@@ -233,27 +251,34 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
         :return:
         """
 
+        # Save content to the filepath.
         await self.pre_process()
-        for path in Path(self.root_storage).rglob(f"*{self.rel_filepath}"):
-            if path.is_file():
-                self.filepath = f"{FILE_STORAGE_FOLDER}/{self.rel_filepath}"
-                break
 
-        if self.filepath is None:
-            self.bot_text = f"[Error] File '{self.rel_filepath.split("/")[-1]}' does not exist on file_storage"
-            await super().send_message()
-            return None
-
+        # Remove original markup for bot_text and move it to under the file message.
         tmp = self.bot_markup
         self.bot_markup = None
         await super().send_message()
-        with open(self.filepath, mode="rb") as file:
-            await self.bot.send_document(chat_id=self.chat_id,
-                                         document=file,
-                                         reply_markup=tmp)
 
+        # send message with file download link and markup
+        try:
+            with open(self.filepath, mode="rb") as file:
+                await self.bot.send_document(chat_id=self.chat_id,
+                                             document=file,
+                                             reply_markup=tmp)
+
+        except FileNotFoundError:
+            raise AttributeError("[SenderWithDocs] You should create a download file by overriding pre_process() method.")
+
+        await self.__remove_file()
         return None
 
-    async def __get_file(self) -> None:
 
+    async def __remove_file(self):
+        """
+        this method removes download file which was temporarily stored in FILE_STORAGE_FOLDER.
+
+        :return: None
+        """
+
+        rmtree("/".join(self.filepath.split("/")[:-1]))
         return None
