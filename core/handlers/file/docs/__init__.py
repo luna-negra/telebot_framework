@@ -6,7 +6,7 @@ from core.handlers.handlers import (ResultShowingWithInlineMarkup,
 
 class ReceiverWithDocs(ResultShowingWithInlineMarkup):
     """
-    ReceiverWithDocs:
+    ReceiverWithFile:
 
     this class is charge of getting uploaded file from telegram user.
     """
@@ -210,15 +210,17 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
         super(SenderWithDocs, self).__init__(types=types, **kwargs)
         self.filename = filename
         self.filepath = f"{SenderWithDocs.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
+        self.content = None
 
-    async def create_file(self, content) -> None:
+    async def __create_file(self, content) -> None:
         """
         this method is charge of producing download file with content from pre_process.
-        please use it at the end of pre_process() method.
-        you can insert your own logic in pre_process without using this method to create a file.
+
+        #please use it at the end of pre_process() method.
+        #you can insert your own logic in pre_process without using this method to create a file.
 
         :param content: content that you would like to write in a file.
-        :return:
+        :return: None
         """
 
         while True:
@@ -235,9 +237,9 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
 
     async def pre_process(self) -> None:
         """
-        create a file on file_storage folder by overriding this method with self.create_file()
+        create a content that you want to write down on download file by overriding this method.
 
-        :return:
+        :return: None
         """
 
         return None
@@ -252,22 +254,26 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
         # Save content to the filepath.
         await self.pre_process()
 
-        # Remove original markup for bot_text and move it to under the file message.
-        tmp = self.bot_markup
-        self.bot_markup = None
-        await super().send_message()
+        if self.content is not None:
+            await self.__create_file(content=self.content)
 
-        # send message with file download link and markup
-        try:
+            # Remove original markup for bot_text and move it to under the file message.
+            tmp = self.bot_markup
+            self.bot_markup = None
+            await super().send_message()
+
+            # send message with file download link and markup
             with open(self.filepath, mode="rb") as file:
                 await self.bot.send_document(chat_id=self.chat_id,
                                              document=file,
                                              reply_markup=tmp)
 
-        except FileNotFoundError:
-            raise AttributeError("[SenderWithDocs] You should create a download file by overriding pre_process() method.")
+            await self.__remove_file()
 
-        await self.__remove_file()
+        else:
+            self.bot_text = "[ERROR] There is no content to write down."
+            await super().send_message()
+
         return None
 
 
