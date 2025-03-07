@@ -67,7 +67,7 @@ class SenderWithImage(ResultShowingWithInlineMarkup):
 
         while True:
             try:
-                with open(self.filepath, mode="wb", encoding="utf-8") as file:
+                with open(self.filepath, mode="wb") as file:
                     file.write(content)
                     break
 
@@ -102,15 +102,18 @@ class SenderWithImage(ResultShowingWithInlineMarkup):
             # Remove original markup for bot_text and move it to under the file message.
             tmp = self.bot_markup
             self.bot_markup = None
-            await self.bot.send_message(chat_id=self.chat_id,
-                                        text=self.bot_text)
+            if await self._remove_prev_message():
+                await self.bot.send_message(chat_id=self.chat_id,
+                                            text=self.bot_text,
+                                            reply_markup=self.bot_markup)
 
             # send message with file download link and markup
-            await self.bot.send_photo(chat_id=self.chat_id,
-                                      photo=self.filepath,
-                                      reply_markup=tmp)
+            with open(self.filepath, mode="rb") as f:
+                await self.bot.send_photo(chat_id=self.chat_id,
+                                          photo=f,
+                                          reply_markup=tmp)
 
-            #await self.__remove_file()
+            await self.__remove_file()
 
         else:
             self.bot_text = "[ERROR] There is no content to write down."

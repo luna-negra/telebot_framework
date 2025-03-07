@@ -260,7 +260,10 @@ class SenderWithDocs(ResultShowingWithInlineMarkup):
             # Remove original markup for bot_text and move it to under the file message.
             tmp = self.bot_markup
             self.bot_markup = None
-            await super().send_message()
+            if await self._remove_prev_message():
+                await self.bot.send_message(chat_id=self.chat_id,
+                                            text=self.bot_text,
+                                            reply_markup=self.bot_markup)
 
             # send message with file download link and markup
             with open(self.filepath, mode="rb") as file:
