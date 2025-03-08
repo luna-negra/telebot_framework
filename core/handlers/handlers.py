@@ -1,4 +1,6 @@
 import re
+from os import makedirs
+from shutil import rmtree
 from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
@@ -379,3 +381,106 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
 
             elif self.page == 0:
                 self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
+
+
+class SenderWithBasic(ResultShowingWithInlineMarkup):
+    """
+    SenderWithBasic:
+
+    this class is charge of sending message only with attachment(file, image or something)
+    this class is a template so do not use it directly.
+
+    the bot will send created image to telegram user.
+    """
+
+    FILE_STORAGE_FOLDER: str = "core/tmp_storage"
+
+    def __init__(self, types, filename:str, **kwargs):
+        super(SenderWithBasic, self).__init__(types=types, **kwargs)
+        self.filename = filename
+        self.filepath = f"{SenderWithBasic.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
+        self.content = None
+        self.bot_text = self.bot_text if self.bot_text is not None \
+            else "** Please download or screenshot the contents, before clicking 'continue'"
+
+    async def __create_file(self, content) -> None:
+        """
+        this method is charge of producing new image with content from pre_process.
+
+        :param content: content that you would like to write in a file.
+        :return: None
+        """
+
+        mode: str = "wb" if isinstance(self.content, bytes) else "w"
+        content = content if isinstance(self.content, bytes) else str(content)
+        while True:
+            try:
+                with open(self.filepath, mode=mode) as file:
+                    file.write(content)
+                    break
+
+            except FileNotFoundError:
+                makedirs(name="/".join(self.filepath.split("/")[:-1]), exist_ok=True)
+
+        return None
+
+    async def pre_process(self) -> None:
+        """
+        create a content that you want to write down on download file by overriding this method.
+        set your content by saving on self.content
+
+        :return: None
+        """
+
+        return None
+
+    async def send_message(self) -> None:
+        """
+        this method is charge of sending message with attachment.
+
+        :return: None
+        """
+        # Save content to the filepath.
+        await self.pre_process()
+
+        # exit if there is no content
+        if self.content is None:
+            self.bot_text = "[ERROR] There is no content to write down."
+            await super().send_message()
+            return None
+
+        # create a file with received content
+        await self.__create_file(content=self.content)
+
+        # send message, if there is a self.bot_text
+        if await self._remove_prev_message():
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=self.bot_text,
+                                        reply_markup=None)
+
+        # send message with image and markup.
+        await self._send_message()
+
+        # remove image file on filesystem
+        await self.__remove_file()
+
+        return None
+
+    async def __remove_file(self):
+        """
+        this method removes download file which was temporarily stored in FILE_STORAGE_FOLDER.
+
+        :return: None
+        """
+
+        rmtree("/".join(self.filepath.split("/")[:-1]))
+        return None
+
+    async def _send_message(self):
+        """
+        this class is an inner method in send_message() which is important to send image or docs contents.
+        each Sender__ class must override this method to send contents with text message.
+
+        :return: None
+        """
+        pass
