@@ -78,7 +78,9 @@ INSTALLED_APPS: list | tuple = (
     'project',
 )
 
+### TELEGRAM BOT CONFIG END ###
 
+### TELEGRAM BOT FRAMEWORK CONFIG ###
 # Set the allowed chat_type.
 # default is ["private"]
 # possible values: "private", "group", "supergroup", "channel"
@@ -93,15 +95,12 @@ MENU_COMMANDS: list = [
     BotCommand(command="main", description="Main"),
 ]
 
-
 # Set chatting mode for your bot.
 # SECRET_MODE is a bool variable that decides whether the previous messages will be removed or not.
 # if True, bot will remove all remained messages in chat room after user types messages or click InlineMarkupButton
 SECRET_MODE: bool = True
 
-
-### TELEGRAM BOT CONFIG END ###
-
+### TELEGRAM BOT FRAMEWORK CONFIG END###
 
 ### LOGGING CONFIG ###
 # Set the log level
