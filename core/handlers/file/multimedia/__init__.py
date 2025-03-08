@@ -1,8 +1,5 @@
-from os import makedirs
-from shutil import rmtree
 from core.handlers.handlers import SenderWithBasic
-from core.handlers.file.docs import (ReceiverWithDocs,
-                                     ResultShowingWithInlineMarkup,)
+from core.handlers.file.docs import ReceiverWithDocs
 
 
 class ReceiverWithImage(ReceiverWithDocs):

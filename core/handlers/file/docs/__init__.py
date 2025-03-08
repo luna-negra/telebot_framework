@@ -16,7 +16,6 @@ class ReceiverWithDocs(ResultShowingWithInlineMarkup):
         """
         this Meta class creates InlineMarkupButton to provide Cancel button to telegram user,
         who does not want to upload his or her file after executing file uploading process.
-
         """
 
         fields = ["Cancel"]

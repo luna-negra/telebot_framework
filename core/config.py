@@ -106,7 +106,7 @@ SECRET_MODE: bool = True
 # Set the log level
 # default is ERROR
 # possible values: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "ERROR"
 
 
 ### LOGGING CONFIG END ###
