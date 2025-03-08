@@ -1,5 +1,3 @@
-from shutil import rmtree
-from os import makedirs
 from core.handlers.handlers import SenderWithBasic
 from core.handlers.handlers import (ResultShowingWithInlineMarkup,
                                     CLIENT_INFO)
