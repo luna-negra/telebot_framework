@@ -30,7 +30,6 @@ class ReceiverWithImage(ReceiverWithDocs):
             else:
                 get_file = await self.bot.get_file(file_id=file_id)
                 self.file = await self.bot.download_file(file_path=get_file.file_path)
-                self.bot.send_photo()
                 await self.post_process()
                 return True
 
