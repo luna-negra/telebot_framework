@@ -1,5 +1,4 @@
-from core.handlers.file.docs import (ReceiverWithDocs,
-                                     CLIENT_INFO)
+from core.handlers.file.docs import ReceiverWithDocs
 
 
 class ReceiverWithWriterFile(ReceiverWithDocs):
