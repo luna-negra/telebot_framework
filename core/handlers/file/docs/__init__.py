@@ -1,6 +1,5 @@
 from core.handlers.handlers import SenderWithBasic
-from core.handlers.handlers import (ResultShowingWithInlineMarkup,
-                                    CLIENT_INFO)
+from core.handlers.handlers import ResultShowingWithInlineMarkup
 
 
 class ReceiverWithDocs(ResultShowingWithInlineMarkup):
