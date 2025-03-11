@@ -83,7 +83,7 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
         if getattr(self.types, "message", None) is None:
             await self._remove_prev_message()
             await self.post_process()
-            return True
+            return False
 
         await super().send_message()
         self.bot_markup = ForceReply()
@@ -97,7 +97,7 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
         params = {
             "q": self.client_response,
             "format": "jsonv2",
-            "limit": 4
+            "limit": 1
         }
         response = requests_get(url=self.GEO_INFO_API_URL + urlencode(params),
                                 headers=headers)
@@ -105,21 +105,23 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
         if response.status_code == 200 and len(response.json()) != 0:
             location = response.json()[0]
             address = location.get("display_name")
-            location_type = location.get('type')
             self.latitude = location.get("lat")
             self.longitude = location.get("lon")
-            text = f"* Location: {self.client_response}\n* Address: {address}\n * Type: {location_type}"
+            text = f"* Location: {self.client_response}\n* Address: {address}\n"
 
-            if await self._remove_prev_message():
-                await self.bot.send_message(chat_id=self.chat_id,
-                                            text=text)
-                await self.bot.send_location(chat_id=self.chat_id,
-                                             latitude=self.latitude,
-                                             longitude=self.longitude,
-                                             reply_markup=self.bot_markup)
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=text)
+
+            await self.bot.send_location(chat_id=self.chat_id,
+                                         latitude=self.latitude,
+                                         longitude=self.longitude,
+                                         reply_markup=self.bot_markup)
+            return False
 
         else:
             self.bot_text = "Fail to get a location info."
+
+        if await self._remove_prev_message():
             await self.bot.send_message(chat_id=self.chat_id,
                                         text=self.bot_text,
                                         reply_markup=self.bot_markup)
