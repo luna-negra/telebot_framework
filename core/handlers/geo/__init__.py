@@ -40,11 +40,6 @@ class ReceiverWithLocation(ResultShowingWithInlineMarkup):
         return False
 
 
-class ReceiverWithRTLocation:
-    # designing from 2025.03.10...
-    pass
-
-
 class SenderWithLocation(ResultShowingWithInlineMarkup):
     def __init__(self, types, **kwargs):
         super(SenderWithLocation, self).__init__(types, **kwargs)
