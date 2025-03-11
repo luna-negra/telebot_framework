@@ -41,12 +41,24 @@ class ReceiverWithLocation(ResultShowingWithInlineMarkup):
 
 
 class SenderWithLocation(ResultShowingWithInlineMarkup):
+    """
+    SenderWithLocation:
+
+    this class is charge of sending location information with latitude and longitude.
+    the dev must set the self.latitude and self.longitude by overriding pre_process.
+    """
+
     def __init__(self, types, **kwargs):
         super(SenderWithLocation, self).__init__(types, **kwargs)
         self.latitude = None
         self.longitude = None
 
     async def pre_process(self):
+        """
+        by overriding this method, set the latitude and longitude (float).
+
+        :return:
+        """
         pass
 
     async def send_message(self):
