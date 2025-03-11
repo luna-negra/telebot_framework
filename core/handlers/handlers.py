@@ -5,7 +5,7 @@ from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
-from core.config import SECRET_MODE
+from config import SECRET_MODE
 
 
 class ReceiverBasic(Receiver):

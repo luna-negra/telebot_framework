@@ -1,6 +1,5 @@
-from execute import (bot,
-                     logger)
-from core.config import ALLOWED_CHAT_TYPE
+from execute import (bot)
+from config import ALLOWED_CHAT_TYPE
 
 
 # temporarily save the client information
