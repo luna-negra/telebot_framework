@@ -66,6 +66,14 @@ class SenderWithLocation(ResultShowingWithInlineMarkup):
 
 
 class SendWithLocationName(ResultShowingWithInlineMarkup):
+    """
+    SendWithLocationName
+
+    this class is charge of searching location name, address or postal number, which is typed by telegram user.
+    this class will return location data with longitude and latitude to telegram user.
+    this class contains 3rd API service(Nominatim OpenStreetMap)
+
+    """
 
     GEO_INFO_API_URL: str = "https://nominatim.openstreetmap.org/search?"
 
@@ -74,20 +82,28 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
         self.latitude = None
         self.longitude = None
 
-    async def send_message(self):
+    async def send_message(self) -> None:
+        # if user input the search query.
         if getattr(self.types, "message", None) is None:
             await self._remove_prev_message()
             await self.post_process()
-            return False
 
-        await super().send_message()
-        self.bot_markup = ForceReply()
-        await self.bot.send_message(chat_id=self.chat_id,
-                                    text="* Postal Number, Address or Site Name:",
-                                    reply_markup=ForceReply())
-        return False
+        # initial stage that the user click the search location callback data.
+        else:
+            await super().send_message()
+            self.bot_markup = ForceReply()
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text="* Postal Number, Address or Site Name:",
+                                        reply_markup=ForceReply())
+        return None
 
-    async def post_process(self):
+    async def post_process(self) -> None:
+        """
+        this method calls Nominatim API and provide user to location information.
+
+        :return:
+        """
+
         headers = {"User-Agent": "telebot_framework"}
         params = {
             "q": self.client_response,
@@ -111,7 +127,7 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
                                          latitude=self.latitude,
                                          longitude=self.longitude,
                                          reply_markup=self.bot_markup)
-            return False
+            return None
 
         else:
             self.bot_text = "Fail to get a location info."
