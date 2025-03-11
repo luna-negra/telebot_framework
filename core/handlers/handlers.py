@@ -83,9 +83,8 @@ class ReceiverBasic(Receiver):
         try:
             # remove previous bot message if SECRET_MODE is True
             if SECRET_MODE:
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id)
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 1)
-                await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - 2)
+                for num in range(10):
+                    await self.bot.delete_message(chat_id=self.chat_id, message_id=self.message_id - num)
 
             else:
                 if self.remove_user_msg:
