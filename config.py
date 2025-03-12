@@ -93,9 +93,6 @@ ALLOWED_CHAT_TYPE: list = ["private"]
 # if you change MENU_COMMANDS, remove your bot and re-enter to apply changes.
 MENU_COMMANDS: list = [
     BotCommand(command="main", description="Main"),
-    BotCommand(command="signin", description="Sign In"),
-    BotCommand(command="signout", description="Sign Out"),
-    BotCommand(command="settings", description="Settings"),
 ]
 
 # Set chatting mode for your bot.
@@ -109,7 +106,7 @@ SECRET_MODE: bool = True
 # Set the log level
 # default is ERROR
 # possible values: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "ERROR"
 
 
 ### LOGGING CONFIG END ###
