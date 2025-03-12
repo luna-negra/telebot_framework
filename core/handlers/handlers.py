@@ -5,6 +5,8 @@ from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
+# test
+from translation import translate
 from config import SECRET_MODE
 
 
@@ -28,6 +30,7 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
+        self.language = CLIENT_INFO[self.chat_id].get("language", self.request_user.language_code)
         self.remove_user_msg = kwargs.get("remove_prev_msg", False)
         self.route = kwargs.get("route", None)
         if self.route is not None:
@@ -134,13 +137,21 @@ class ReceiverWithForceReply(ReceiverBasic):
         if len(self.fields) == 0:
             raise AttributeError("[ReceiverWithForceReply] 'fields' in Meta class must have at least one field name")
 
-        self.fields_text = getattr(self.Meta, 'fields_text', {field: field for field in self.fields})
+        self.fields_text = self._translate_fields_text()
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
         self.fields_error_msg = getattr(self.Meta, 'fields_error_msg', {field: f"'{field}' does not match regex." for field in self.fields})
+
+    def _translate_fields_text(self) -> dict:
+        if getattr(self.Meta, "fields_text", None) is None:
+            return {field: field for field in self.fields}
+
+        return {k: translate(domain="default_handlers", key=v, language_code=self.language) for k, v in self.Meta.fields_text.items()}
+
 
     async def get_client_data(self) -> bool:
         """
         get_client_data:
+
         This method gets severer inputs from telegram user, referring to the Meta.field.
         -  send message to telegram user to guide what text user must input.
         -  get user input for each field

@@ -6,9 +6,13 @@ from core.handlers.handlers import (ReceiverBasic,
 class SignInBasic(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
+        #fields_text = {
+        #    "email": "[Sign In]\n* Input Email",
+        #    "password": "[Sign In]\n* Input Password",
+        #}
         fields_text = {
-            "email": "[Sign In]\n* Input Email",
-            "password": "[Sign In]\n* Input Password",
+            "email": "signin_email",
+            "password": "signin_password",
         }
         fields_regex = {
             "email": "^.+@.+\\..+$",

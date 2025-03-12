@@ -165,6 +165,7 @@ def route_process(types,
     """
 
     chat_id: int = types.from_user.id
+    language: str = types.from_user.language_code
     client_info: dict | None = __check_client_info(chat_id=chat_id, reset_index=reset_index)
     condition1: bool = __check_route(client_info=client_info, allowed_pre_route=allowed_pre_route)
     condition2: bool = __check_callback(reply=types, callback_data=callback_data)
