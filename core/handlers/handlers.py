@@ -124,10 +124,11 @@ class ReceiverWithForceReply(ReceiverBasic):
         fields_regex: str | list | tuple | None = None
         fields_error_msg: str | list | tuple | None = None
 
-    def __init__(self, types, **kwargs):
+    def __init__(self, types, link_route, **kwargs):
         super(ReceiverWithForceReply, self).__init__(types=types, **kwargs)
         self.client_data = CLIENT_INFO[self.chat_id]["data"]
-        self.bot_markup = ForceReply()
+        self.link_route = link_route
+        #self.bot_markup = ForceReply()
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
@@ -223,7 +224,22 @@ class ReceiverWithForceReply(ReceiverBasic):
         # Index is not equal to length of fields in Meta class.
         if index != len(self.fields):
             field = self.fields[index]
+
+            # provide cancel button.
+            self.bot_text = translate(domain="default_handlers",
+                                      key="guide_force_reply_cancel",
+                                      language_code=self.language)
+            self.bot_markup = quick_markup(values={})
+            self.bot_markup.add(InlineKeyboardButton(text=translate(domain="default_buttons",
+                                                                    key="cancel",
+                                                                    language_code=self.language),
+                                                     callback_data=self.link_route))
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=self.bot_text,
+                                        reply_markup=self.bot_markup)
+
             self.bot_text = self.fields_text[field]
+            self.bot_markup = ForceReply()
 
             # update index number for referring.
             CLIENT_INFO[self.chat_id].update({"index": index + 1})
@@ -300,7 +316,9 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
         if self.fields is not None:
             self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
             self.fields_url = getattr(self.Meta, "fields_url", {field: None for field in self.fields})
-            self.values = {key: {
+            self.values = {translate(domain="default_buttons",
+                                     key=key,
+                                     language_code=self.language): {
                 "callback_data": self.fields_callback.get(key, key.lower().replace(" ", "_")),
                 "url": self.fields_url.get(key, None),
             } for key in self.fields}

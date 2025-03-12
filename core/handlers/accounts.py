@@ -1,6 +1,7 @@
 from core.handlers.handlers import (ReceiverBasic,
                                     ReceiverWithForceReply,
                                     CLIENT_INFO)
+from translation import translate
 
 
 class SignInBasic(ReceiverWithForceReply):
@@ -25,14 +26,19 @@ class SignInBasic(ReceiverWithForceReply):
             return await super().get_client_data()
 
         else:
-            await self.bot.send_message(chat_id=self.chat_id, text="[WARNING]\nYou are already signed in.")
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=translate(domain="default_warnings",
+                                                       key="warn_already_signin",
+                                                       language_code=self.language))
             return True
 
 
 class SignOut(ReceiverBasic):
     async def pre_process(self) -> bool:
         if not CLIENT_INFO[self.chat_id].get("is_signin"):
-            self.bot_text = "[WARNING]\nYou are already signed out."
+            self.bot_text = translate(domain="default_warnings",
+                                      key="warn_already_signout",
+                                      language_code=self.language)
             return False
         return True
 
@@ -81,7 +87,7 @@ class DeleteAccount(ReceiverWithForceReply):
     class Meta:
         fields = ["password"]
         fields_text = {
-            "password": "[Delete Account]\n* Input Password to delete your account."
+            "password": "delete_account"
         }
 
     def __init__(self, types, **kwargs):
