@@ -1,5 +1,6 @@
 from core.handlers.handlers import SenderWithBasic
 from core.handlers.handlers import ResultShowingWithInlineMarkup
+from translation import translate
 
 
 class ReceiverWithDocs(ResultShowingWithInlineMarkup):
@@ -86,7 +87,9 @@ class ReceiverWithCSVFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "text/comma-separated-values":
-            raise ValueError(f"[ERROR] File must be a CSV. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_csv",
+                                       language_code=self.language))
 
         return None
 
@@ -100,7 +103,9 @@ class ReceiverWithJsonFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "application/json":
-            raise ValueError(f"[ERROR] File must be a Json. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_json",
+                                       language_code=self.language))
 
         return None
 
@@ -114,7 +119,9 @@ class ReceiverWithMarkdownFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "text/markdown":
-            raise ValueError(f"[ERROR] File must be a Markdown. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_markdown",
+                                       language_code=self.language))
 
         return None
 
@@ -128,7 +135,9 @@ class ReceiverWithPDFFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "application/pdf":
-            raise ValueError(f"[ERROR] File must be a PDF. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_pdf",
+                                       language_code=self.language))
 
         return None
 
@@ -142,7 +151,9 @@ class ReceiverWithTextFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "text/plain":
-            raise ValueError(f"[ERROR] File must be a text. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_text",
+                                       language_code=self.language))
 
         return None
 
@@ -156,7 +167,9 @@ class ReceiverWithXMLFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "application/xml":
-            raise ValueError(f"[ERROR] File must be an XML. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_xml",
+                                       language_code=self.language))
 
         return None
 
@@ -170,7 +183,9 @@ class ReceiverWithYamlFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "application/octet-stream":
-            raise ValueError(f"[ERROR] File must be a YAML. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_yaml",
+                                       language_code=self.language))
 
         return None
 
@@ -184,7 +199,9 @@ class ReceiverWithZipFile(ReceiverWithDocs):
 
     async def validate_file(self) -> None:
         if not self.file_type == "application/zip":
-            raise ValueError(f"[ERROR] File must be a zip. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_zip",
+                                       language_code=self.language))
 
         return None
 

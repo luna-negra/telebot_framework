@@ -2,7 +2,7 @@ import asyncio
 from importlib import import_module
 from telebot.async_telebot import (logger,
                                    AsyncTeleBot,)
-from core.config import *
+from config import *
 
 
 # create a Telegram Bot instance

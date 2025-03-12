@@ -1,10 +1,13 @@
 from core.handlers.file.docs import ReceiverWithDocs
+from translation import translate
 
 
 class ReceiverWithExcelFile(ReceiverWithDocs):
     async def validate_file(self):
         if not self.file_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-            raise ValueError(f"[ERROR] File must be an Excel. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_excel",
+                                       language_code=self.language))
 
         return None
 
@@ -12,12 +15,16 @@ class ReceiverWithExcelFile(ReceiverWithDocs):
 class ReceiverWithPPTFile(ReceiverWithDocs):
     async def validate_file(self):
         if not self.file_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-            raise ValueError(f"[ERROR] File must be an PPT. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_ppt",
+                                       language_code=self.language))
 
 
 class ReceiverWithWordFile(ReceiverWithDocs):
     async def validate_file(self):
         if not self.file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            raise ValueError(f"[ERROR] File must be an Word. You uploaded '{self.file_type}'")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_upload_not_word",
+                                       language_code=self.language))
 
         return None

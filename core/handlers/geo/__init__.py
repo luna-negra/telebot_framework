@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 from requests import get as requests_get
 from telebot.types import ForceReply
 from core.handlers.handlers import ResultShowingWithInlineMarkup
+from translation import translate
 
 
 class ReceiverWithLocation(ResultShowingWithInlineMarkup):
@@ -65,10 +66,14 @@ class SenderWithLocation(ResultShowingWithInlineMarkup):
         await self.pre_process()
 
         if self.latitude is None or self.longitude is None:
-            raise ValueError("[ERROR] Fail to get location information.")
+            raise ValueError(translate(domain="default_warnings",
+                                       key="warn_location_not_found",
+                                       language_code=self.language))
 
         if not isinstance(self.latitude, float) or not isinstance(self.longitude, float):
-            raise ValueError("[Error] Latitude or longitude must be float.")
+            raise ValueError(translate(domain="default_exceptions",
+                                       key="err_location_wrong_type",
+                                       language_code=self.language))
 
         await self.bot.send_location(chat_id=self.chat_id,
                                      latitude=self.latitude,
@@ -102,10 +107,15 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
 
         # initial stage that the user click the search location callback data.
         else:
+            self.bot_text = translate(domain="default_handlers",
+                                      key="guide_force_reply_continue",
+                                      language_code=self.language)
             await super().send_message()
             self.bot_markup = ForceReply()
             await self.bot.send_message(chat_id=self.chat_id,
-                                        text="* Postal Number, Address or Site Name:",
+                                        text=translate(domain="default_handlers",
+                                                       key="guide_location_input",
+                                                       language_code=self.language),
                                         reply_markup=ForceReply())
         return None
 
@@ -130,7 +140,9 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
             address = location.get("display_name")
             self.latitude = location.get("lat")
             self.longitude = location.get("lon")
-            text = f"* Location: {self.client_response}\n* Address: {address}\n"
+            text = translate(domain="default_handlers",
+                             key="result_location_search",
+                             language_code=self.language).format(self.client_response, address)
 
             await self.bot.send_message(chat_id=self.chat_id,
                                         text=text)
@@ -142,7 +154,9 @@ class SendWithLocationName(ResultShowingWithInlineMarkup):
             return None
 
         else:
-            self.bot_text = "Fail to get a location info."
+            self.bot_text = translate(domain="default_warnings",
+                                       key="warn_location_not_found",
+                                       language_code=self.language)
 
         if await self._remove_prev_message():
             await self.bot.send_message(chat_id=self.chat_id,

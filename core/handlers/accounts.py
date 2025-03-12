@@ -1,20 +1,21 @@
 from core.handlers.handlers import (ReceiverBasic,
                                     ReceiverWithForceReply,
                                     CLIENT_INFO)
+from translation import translate
 
 
 class SignInBasic(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
         fields_text = {
-            "email": "[Sign In]\n* Input Email",
-            "password": "[Sign In]\n* Input Password",
+            "email": "signin_email",
+            "password": "signin_password",
         }
         fields_regex = {
             "email": "^.+@.+\\..+$",
         }
         fields_error_msg = {
-            "email": "Not an Email Format",
+            "email": "warn_email_format",
         }
 
     def __init__(self, types, **kwargs):
@@ -25,14 +26,19 @@ class SignInBasic(ReceiverWithForceReply):
             return await super().get_client_data()
 
         else:
-            await self.bot.send_message(chat_id=self.chat_id, text="[WARNING]\nYou are already signed in.")
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=translate(domain="default_warnings",
+                                                       key="warn_already_signin",
+                                                       language_code=self.language))
             return True
 
 
 class SignOut(ReceiverBasic):
     async def pre_process(self) -> bool:
         if not CLIENT_INFO[self.chat_id].get("is_signin"):
-            self.bot_text = "[WARNING]\nYou are already signed out."
+            self.bot_text = translate(domain="default_warnings",
+                                      key="warn_already_signout",
+                                      language_code=self.language)
             return False
         return True
 
@@ -51,8 +57,8 @@ class SignUp(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
         fields_text = {
-            "email": "[Sign Up]\n* Input Email",
-            "password": "[Sign Up]\n* Input Password",
+            "email": "signup_email",
+            "password": "signup_password",
         }
         fields_regex = {
             "email": ("^.*@.+\\..+$", "^.+@.+\\.com"),
@@ -64,12 +70,12 @@ class SignUp(ReceiverWithForceReply):
             )
         }
         fields_error_msg = {
-            "email": "Not an Email Format",
+            "email": "warn_email_format",
             "password": (
-                "Must contain at least one Upper",
-                "Must contain at least one Lower",
-                "Must contain at least one digit",
-                "Must contain at least one special",
+                "warn_password_no_upper",
+                "warn_password_no_lower",
+                "warn_password_no_digit",
+                "warn_password_no_special",
             )
         }
 
@@ -81,7 +87,7 @@ class DeleteAccount(ReceiverWithForceReply):
     class Meta:
         fields = ["password"]
         fields_text = {
-            "password": "[Delete Account]\n* Input Password to delete your account."
+            "password": "delete_account"
         }
 
     def __init__(self, types, **kwargs):

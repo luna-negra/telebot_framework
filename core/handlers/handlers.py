@@ -5,7 +5,8 @@ from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
-from core.config import SECRET_MODE
+from translation import translate
+from config import SECRET_MODE
 
 
 class ReceiverBasic(Receiver):
@@ -28,6 +29,7 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
+        self.language = CLIENT_INFO[self.chat_id].get("language", self.request_user.language_code)
         self.remove_user_msg = kwargs.get("remove_prev_msg", False)
         self.route = kwargs.get("route", None)
         if self.route is not None:
@@ -122,25 +124,52 @@ class ReceiverWithForceReply(ReceiverBasic):
         fields_regex: str | list | tuple | None = None
         fields_error_msg: str | list | tuple | None = None
 
-    def __init__(self, types, **kwargs):
+    def __init__(self, types, link_route, **kwargs):
         super(ReceiverWithForceReply, self).__init__(types=types, **kwargs)
         self.client_data = CLIENT_INFO[self.chat_id]["data"]
-        self.bot_markup = ForceReply()
+        self.link_route = link_route
+        #self.bot_markup = ForceReply()
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
-            raise ValueError("[ReceiverWithForceReply] 'fields' in Meta class must be list or tuple")
+            raise ValueError(translate(domain="default_exceptions", key="err_force_reply_fields_type", language_code=self.language))
 
         if len(self.fields) == 0:
-            raise AttributeError("[ReceiverWithForceReply] 'fields' in Meta class must have at least one field name")
+            raise AttributeError(translate(domain="default_exceptions", key="err_force_reply_empty_field", language_code=self.language))
 
-        self.fields_text = getattr(self.Meta, 'fields_text', {field: field for field in self.fields})
+        self.fields_text = self._translate_fields_text()
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
-        self.fields_error_msg = getattr(self.Meta, 'fields_error_msg', {field: f"'{field}' does not match regex." for field in self.fields})
+        self.fields_error_msg = self._translate_fields_error_msg()
+
+    def _translate_fields_text(self) -> dict:
+        if getattr(self.Meta, "fields_text", None) is None:
+            return {field: field for field in self.fields}
+
+        return {k: translate(domain="default_handlers", key=v, language_code=self.language)
+                for k, v in self.Meta.fields_text.items()}
+
+    def _translate_fields_error_msg(self) -> dict:
+        if getattr(self.Meta, 'fields_error_msg', None) is None:
+            return {field: translate(domain="default_warnings",
+                                     key="warn_default_regex_mismatch",
+                                     language_code=self.language).format(field)
+                    for field in self.fields}
+
+        tmp = {}
+        for k, v in self.Meta.fields_error_msg.items():
+            if type(v) in [list, tuple]:
+                tmp.update({k: [translate(domain="default_warnings", key=atom, language_code=self.language)
+                                for atom in v]})
+
+            else:
+                tmp.update({k: translate(domain="default_warnings", key=v, language_code=self.language)})
+
+        return tmp
 
     async def get_client_data(self) -> bool:
         """
         get_client_data:
+
         This method gets severer inputs from telegram user, referring to the Meta.field.
         -  send message to telegram user to guide what text user must input.
         -  get user input for each field
@@ -159,7 +188,10 @@ class ReceiverWithForceReply(ReceiverBasic):
             pre_index = index - 1
             pre_field = self.fields[pre_index]
             regex_list = self.fields_regex.get(pre_field, [".*"])
-            error_msg = self.fields_error_msg.get(pre_field, f"'{pre_field}' is not satisfying regex.")
+            error_msg = self.fields_error_msg.get(pre_field,
+                                                  translate(domain="default_warnings",
+                                                            key="warn_input_regex_mismatch",
+                                                            language_code=self.language).format(pre_field))
 
             if not isinstance(regex_list, (list, tuple)):
                 regex_list = [regex_list]
@@ -192,7 +224,22 @@ class ReceiverWithForceReply(ReceiverBasic):
         # Index is not equal to length of fields in Meta class.
         if index != len(self.fields):
             field = self.fields[index]
+
+            # provide cancel button.
+            self.bot_text = translate(domain="default_handlers",
+                                      key="guide_force_reply_cancel",
+                                      language_code=self.language)
+            self.bot_markup = quick_markup(values={})
+            self.bot_markup.add(InlineKeyboardButton(text=translate(domain="default_buttons",
+                                                                    key="cancel",
+                                                                    language_code=self.language),
+                                                     callback_data=self.link_route))
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=self.bot_text,
+                                        reply_markup=self.bot_markup)
+
             self.bot_text = self.fields_text[field]
+            self.bot_markup = ForceReply()
 
             # update index number for referring.
             CLIENT_INFO[self.chat_id].update({"index": index + 1})
@@ -269,7 +316,9 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
         if self.fields is not None:
             self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
             self.fields_url = getattr(self.Meta, "fields_url", {field: None for field in self.fields})
-            self.values = {key: {
+            self.values = {translate(domain="default_buttons",
+                                     key=key,
+                                     language_code=self.language): {
                 "callback_data": self.fields_callback.get(key, key.lower().replace(" ", "_")),
                 "url": self.fields_url.get(key, None),
             } for key in self.fields}
@@ -400,7 +449,7 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         self.filepath = f"{SenderWithBasic.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
         self.content = None
         self.bot_text = self.bot_text if self.bot_text is not None \
-            else "** Please download or screenshot the contents, before clicking 'continue'"
+            else translate(domain="default_handlers", key="sender_with_basic_download", language_code=self.language)
 
     async def __create_file(self, content) -> None:
         """
@@ -444,7 +493,9 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
 
         # exit if there is no content
         if self.content is None:
-            self.bot_text = "[ERROR] There is no content to write down."
+            self.bot_text = translate(domain="default_warnings",
+                                      key="warn_doc_without_content",
+                                      language_code=self.language)
             await super().send_message()
             return None
 
