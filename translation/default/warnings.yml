@@ -1,0 +1,32 @@
+warn_email_format:
+  en: "[Warning] Not an E-mail Format."
+  ko: "[Warning] 이메일 형식이 아닙니다."
+
+warn_password_no_upper:
+  en: "[Warning] Password Must contain at Least One Upper"
+  ko: "[Warning] 비밀번호는 반드시 하나 이상의 대문자를 포함해야 합니다."
+
+warn_password_no_lower:
+  en: "[Warning] Password Must contain at Least One Lower"
+  ko: "[Warning] 비밀번호는 반드시 하나 이상의 소문자를 포함해야 합니다."
+
+warn_password_no_digit:
+  en: "[Warning] Password Must contain at Least One Digit"
+  ko: "[Warning] 비밀번호는 반드시 하나 이상의 숫자를 포함해야 합니다."
+
+warn_password_no_special:
+  en: "[Warning] Password Must contain at Least One Digit"
+  ko: "[Warning] 비밀번호는 반드시 하나 이상의 특수문자를 포함해야 합니다."
+
+warn_default_regex_mismatch:
+  en: "[Warning] '{}' does not match regex."
+  ko: "[Warning] '{}' 입력값이 지정된 형식과 일치하지 않습니다."
+
+warn_input_regex_mismatch:
+  en: "[Warning] '{}' is not satisfying regex."
+  ko: "[Warning] '{}' 입력값이 지정된 형식을 만족하지 않습니다."
+
+
+warn_doc_without_content:
+  en: "[Warning] There is no content to write down."
+  ko: "[Warning] 파일 또는 이미지에 기록할 내용이 없습니다."

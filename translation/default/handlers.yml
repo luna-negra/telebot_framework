@@ -1,0 +1,19 @@
+signin_email:
+  en: "[Sign In]\n* Please Input Your E-mail Address:"
+  ko: "[로그인]\n* 이메일 주소 입력:"
+
+signin_password:
+  en: "[Sign In]\n* Please Input Your Password"
+  ko: "[로그인]\n* 비밀번호 입력:"
+
+signup_email:
+  en: "[Sign Up]\n* Please Input Your E-mail Address:"
+  ko: "[회원가입]\n* 이메일 주소 입력:"
+
+signup_password:
+  en: "[Sign Up]\n* Please Input Your Password"
+  ko: "[회원가입]\n* 비밀번호 입력:"
+
+sender_with_basic_download:
+  en: "** Please download or screenshot the contents, before clicking 'continue'"
+  ko: "** 'Continue' 버튼을 누르기 전 파일 다운로드 또는 스크린샷을 진행해주세요."

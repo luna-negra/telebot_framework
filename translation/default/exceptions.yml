@@ -1,0 +1,7 @@
+err_force_reply_fields_type:
+  en: "[ReceiverWithForceReply] 'fields' in Meta class must be list or tuple"
+  ko: "[ReceiverWithForceReply] Meta class 내 'fields' 타입은 반드시 list 또는 tuple 이어야 합니다. "
+
+err_force_reply_empty_field:
+  en: "[ReceiverWithForceReply] 'fields' in Meta class must have at least one field name"
+  ko: "[ReceiverWithForceReply] Meta class 내 'fields'는 반드시 하나 이상의 field를 포함해야 합니다."

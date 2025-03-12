@@ -5,7 +5,6 @@ from telebot.util import quick_markup
 from telebot.asyncio_helper import ApiTelegramException
 from core.handlers import *
 from core.routes import CLIENT_INFO
-# test
 from translation import translate
 from config import SECRET_MODE
 
@@ -132,21 +131,39 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
-            raise ValueError("[ReceiverWithForceReply] 'fields' in Meta class must be list or tuple")
+            raise ValueError(translate(domain="default_exceptions", key="err_force_reply_fields_type", language_code=self.language))
 
         if len(self.fields) == 0:
-            raise AttributeError("[ReceiverWithForceReply] 'fields' in Meta class must have at least one field name")
+            raise AttributeError(translate(domain="default_exceptions", key="err_force_reply_empty_field", language_code=self.language))
 
         self.fields_text = self._translate_fields_text()
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
-        self.fields_error_msg = getattr(self.Meta, 'fields_error_msg', {field: f"'{field}' does not match regex." for field in self.fields})
+        self.fields_error_msg = self._translate_fields_error_msg()
 
     def _translate_fields_text(self) -> dict:
         if getattr(self.Meta, "fields_text", None) is None:
             return {field: field for field in self.fields}
 
-        return {k: translate(domain="default_handlers", key=v, language_code=self.language) for k, v in self.Meta.fields_text.items()}
+        return {k: translate(domain="default_handlers", key=v, language_code=self.language)
+                for k, v in self.Meta.fields_text.items()}
 
+    def _translate_fields_error_msg(self) -> dict:
+        if getattr(self.Meta, 'fields_error_msg', None) is None:
+            return {field: translate(domain="default_warnings",
+                                     key="warn_default_regex_mismatch",
+                                     language_code=self.language).format(field)
+                    for field in self.fields}
+
+        tmp = {}
+        for k, v in self.Meta.fields_error_msg.items():
+            if type(v) in [list, tuple]:
+                tmp.update({k: [translate(domain="default_warnings", key=atom, language_code=self.language)
+                                for atom in v]})
+
+            else:
+                tmp.update({k: translate(domain="default_warnings", key=v, language_code=self.language)})
+
+        return tmp
 
     async def get_client_data(self) -> bool:
         """
@@ -170,7 +187,10 @@ class ReceiverWithForceReply(ReceiverBasic):
             pre_index = index - 1
             pre_field = self.fields[pre_index]
             regex_list = self.fields_regex.get(pre_field, [".*"])
-            error_msg = self.fields_error_msg.get(pre_field, f"'{pre_field}' is not satisfying regex.")
+            error_msg = self.fields_error_msg.get(pre_field,
+                                                  translate(domain="default_warnings",
+                                                            key="warn_input_regex_mismatch",
+                                                            language_code=self.language).format(pre_field))
 
             if not isinstance(regex_list, (list, tuple)):
                 regex_list = [regex_list]
@@ -411,7 +431,7 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         self.filepath = f"{SenderWithBasic.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
         self.content = None
         self.bot_text = self.bot_text if self.bot_text is not None \
-            else "** Please download or screenshot the contents, before clicking 'continue'"
+            else translate(domain="default_handlers", key="sender_with_basic_download", language_code=self.language)
 
     async def __create_file(self, content) -> None:
         """
@@ -455,7 +475,9 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
 
         # exit if there is no content
         if self.content is None:
-            self.bot_text = "[ERROR] There is no content to write down."
+            self.bot_text = translate(domain="default_warnings",
+                                      key="warn_doc_without_content",
+                                      language_code=self.language)
             await super().send_message()
             return None
 

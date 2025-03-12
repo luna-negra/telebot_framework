@@ -6,10 +6,6 @@ from core.handlers.handlers import (ReceiverBasic,
 class SignInBasic(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
-        #fields_text = {
-        #    "email": "[Sign In]\n* Input Email",
-        #    "password": "[Sign In]\n* Input Password",
-        #}
         fields_text = {
             "email": "signin_email",
             "password": "signin_password",
@@ -18,7 +14,7 @@ class SignInBasic(ReceiverWithForceReply):
             "email": "^.+@.+\\..+$",
         }
         fields_error_msg = {
-            "email": "Not an Email Format",
+            "email": "warn_email_format",
         }
 
     def __init__(self, types, **kwargs):
@@ -55,8 +51,8 @@ class SignUp(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
         fields_text = {
-            "email": "[Sign Up]\n* Input Email",
-            "password": "[Sign Up]\n* Input Password",
+            "email": "signup_email",
+            "password": "signup_password",
         }
         fields_regex = {
             "email": ("^.*@.+\\..+$", "^.+@.+\\.com"),
@@ -68,12 +64,12 @@ class SignUp(ReceiverWithForceReply):
             )
         }
         fields_error_msg = {
-            "email": "Not an Email Format",
+            "email": "warn_email_format",
             "password": (
-                "Must contain at least one Upper",
-                "Must contain at least one Lower",
-                "Must contain at least one digit",
-                "Must contain at least one special",
+                "warn_password_no_upper",
+                "warn_password_no_lower",
+                "warn_password_no_digit",
+                "warn_password_no_special",
             )
         }
 

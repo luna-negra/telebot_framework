@@ -1,7 +1,0 @@
-signin_email:
-  en: "[Sign In]\n* Please Input Your E-mail Address:"
-  ko: "[로그인]\n* 이메일 주소 입력:"
-
-signin_password:
-  en: "[Sign In]\n* Please Input Your Password"
-  ko: "[로그인]\n* 비밀번호 입력:"
