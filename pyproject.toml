@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mizuhara"
-version = "2025.0.1"
+version = "0.0.3"
 authors = [
   { name="luna-negra", email="" },
 ]
@@ -26,7 +26,7 @@ classifiers = [
 license = "MIT"
 
 [project.scripts]
-mizuhara = "src.mizuhara.core.commands.mizuhara:main"
+mizuhara = "mizuhara.core.commands.mizuhara:main"
 
 [prject.ulrs]
 Homepage = "https://example.com"
