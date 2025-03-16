@@ -8,6 +8,7 @@ def main():
     :return: None
     """
 
+    print("test, Hello, Mizuhara")
     return None
 
 

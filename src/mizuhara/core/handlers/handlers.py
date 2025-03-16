@@ -2,8 +2,10 @@ import re
 from os import makedirs
 from shutil import rmtree
 from telebot.util import quick_markup
+from telebot.types import InlineKeyboardButton
 from telebot.asyncio_helper import ApiTelegramException
-from core.handlers import *
+from core.handlers import (Receiver,
+                           CallbackQuery)
 from core.routes import CLIENT_INFO
 from translation import translate
 from config import SECRET_MODE

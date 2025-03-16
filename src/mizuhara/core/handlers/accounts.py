@@ -1,6 +1,6 @@
 from core.handlers.handlers import (ReceiverBasic,
-                                    ReceiverWithForceReply,
-                                    CLIENT_INFO)
+                                                 ReceiverWithForceReply,
+                                                 CLIENT_INFO)
 from translation import translate
 
 
