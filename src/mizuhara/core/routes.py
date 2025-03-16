@@ -1,4 +1,4 @@
-from execute import (bot)
+from execute import bot
 from config import ALLOWED_CHAT_TYPE
 
 

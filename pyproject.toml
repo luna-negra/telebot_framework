@@ -25,6 +25,8 @@ classifiers = [
 ]
 license = "MIT"
 
+[project.scripts]
+mizuhara = "src.mizuhara.core.commands.mizuhara:main"
 
 [prject.ulrs]
 Homepage = "https://example.com"
