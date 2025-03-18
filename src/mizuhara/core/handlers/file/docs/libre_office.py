@@ -1,5 +1,5 @@
-from core.handlers.file.docs import ReceiverWithDocs
-from translation import translate
+from mizuhara.core.handlers.file.docs import ReceiverWithDocs
+from mizuhara.translation import translate
 
 
 class ReceiverWithWriterFile(ReceiverWithDocs):

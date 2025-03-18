@@ -1,7 +1,9 @@
-import yaml
+import importlib.resources
+from yaml import safe_load
+from os.path import exists
 
 
-def translate(domain:str, key:str, language_code:str="en") -> str:
+def translate(domain: str, key: str, language_code: str = "en") -> str:
     """
     this function is charge of translate string, which is defined on yaml file in the same path, into another language_code.
     if you need customize, please create another yaml file on translation folder,
@@ -13,14 +15,22 @@ def translate(domain:str, key:str, language_code:str="en") -> str:
     :return: str
     """
 
-    # read yaml file into dictionary.
-    with open(f"translation/{domain.replace("_", "/")}.yml", mode="r", encoding="utf-8") as file:
-        content = dict(yaml.safe_load(file))
-
+    # convert file name to file system format.
+    file_name = f"{domain.replace("_", "/")}.yml"
     try:
-        # return translated string
-        return content.get(key.lower()).get(language_code)
+        with importlib.resources.files("mizuhara.translation").joinpath(file_name).open("r", encoding="utf-8") as file:
+            content = safe_load(file) or {}
+            if content.get(key.lower(), None) is None:
+                raise ModuleNotFoundError
 
-    # if there is no key in yml file, return original string(key)
-    except AttributeError:
-        return key
+    except (FileNotFoundError, ModuleNotFoundError):
+        # Check if there's a user-defined translation file
+        if exists(f"translation/{file_name}"):
+            with open(f"translation/{file_name}", mode="r", encoding="utf-8") as file:
+                content = safe_load(file) or {}
+
+        # If no translation file exists, return the original key
+        else:
+            return key
+
+    return content.get(key.lower(), {}).get(language_code, key)

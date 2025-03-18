@@ -1,7 +1,7 @@
-from core.handlers.handlers import (ReceiverBasic,
-                                                 ReceiverWithForceReply,
-                                                 CLIENT_INFO)
-from translation import translate
+from mizuhara.core.handlers.handlers import (ReceiverBasic,
+                                             ReceiverWithForceReply,
+                                             CLIENT_INFO)
+from mizuhara.translation import translate
 
 
 class SignInBasic(ReceiverWithForceReply):
@@ -27,16 +27,16 @@ class SignInBasic(ReceiverWithForceReply):
 
         else:
             await self.bot.send_message(chat_id=self.chat_id,
-                                        text=translate(domain="default_warnings",
+                                        text=translate(domain="warnings",
                                                        key="warn_already_signin",
                                                        language_code=self.language))
             return True
 
 
-class SignOut(ReceiverBasic):
+class SignOutBasic(ReceiverBasic):
     async def pre_process(self) -> bool:
         if not CLIENT_INFO[self.chat_id].get("is_signin"):
-            self.bot_text = translate(domain="default_warnings",
+            self.bot_text = translate(domain="warnings",
                                       key="warn_already_signout",
                                       language_code=self.language)
             return False
@@ -53,7 +53,7 @@ class SignOut(ReceiverBasic):
         pass
 
 
-class SignUp(ReceiverWithForceReply):
+class SignUpBasic(ReceiverWithForceReply):
     class Meta:
         fields = ["email", "password"]
         fields_text = {
@@ -80,10 +80,10 @@ class SignUp(ReceiverWithForceReply):
         }
 
     def __init__(self, types, **kwargs):
-        super(SignUp, self).__init__(types, **kwargs)
+        super(SignUpBasic, self).__init__(types, **kwargs)
 
 
-class DeleteAccount(ReceiverWithForceReply):
+class DeleteAccountBasic(ReceiverWithForceReply):
     class Meta:
         fields = ["password"]
         fields_text = {
@@ -91,4 +91,4 @@ class DeleteAccount(ReceiverWithForceReply):
         }
 
     def __init__(self, types, **kwargs):
-        super(DeleteAccount, self).__init__(types, **kwargs)
+        super(DeleteAccountBasic, self).__init__(types, **kwargs)

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mizuhara"
-version = "0.0.3"
+version = "0.0.15"
 authors = [
   { name="luna-negra", email="" },
 ]
@@ -18,6 +18,7 @@ dependencies = [
     'pyTelegramBotAPI>=4.26.0',
     'PyYAML>=6.0.2',
     'requests>=2.32.3',
+    'aiohttp>=3.11.11'
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -27,6 +28,9 @@ license = "MIT"
 
 [project.scripts]
 mizuhara = "mizuhara.core.commands.mizuhara:main"
+
+[tool.setuptools.package-data]
+"mizuhara" = ["translation/default/*.yml"]
 
 [prject.ulrs]
 Homepage = "https://example.com"
