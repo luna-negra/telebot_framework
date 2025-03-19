@@ -2,11 +2,15 @@ import re
 from os import makedirs
 from shutil import rmtree
 from telebot.util import quick_markup
+from telebot.types import (InlineKeyboardButton,
+                           InlineKeyboardMarkup,
+                           ForceReply)
 from telebot.asyncio_helper import ApiTelegramException
-from core.handlers import *
-from core.routes import CLIENT_INFO
-from translation import translate
-from config import SECRET_MODE
+from mizuhara.core.handlers import (Receiver,
+                           CallbackQuery)
+from mizuhara.core.routes import CLIENT_INFO
+from mizuhara.translation import translate
+from mizuhara.config import SECRET_MODE
 
 
 class ReceiverBasic(Receiver):
@@ -132,10 +136,10 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
-            raise ValueError(translate(domain="default_exceptions", key="err_force_reply_fields_type", language_code=self.language))
+            raise ValueError(translate(domain="exceptions", key="err_force_reply_fields_type", language_code=self.language))
 
         if len(self.fields) == 0:
-            raise AttributeError(translate(domain="default_exceptions", key="err_force_reply_empty_field", language_code=self.language))
+            raise AttributeError(translate(domain="exceptions", key="err_force_reply_empty_field", language_code=self.language))
 
         self.fields_text = self._translate_fields_text()
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
@@ -145,24 +149,24 @@ class ReceiverWithForceReply(ReceiverBasic):
         if getattr(self.Meta, "fields_text", None) is None:
             return {field: field for field in self.fields}
 
-        return {k: translate(domain="default_handlers", key=v, language_code=self.language)
+        return {k: translate(domain="handlers", key=v, language_code=self.language)
                 for k, v in self.Meta.fields_text.items()}
 
     def _translate_fields_error_msg(self) -> dict:
         if getattr(self.Meta, 'fields_error_msg', None) is None:
-            return {field: translate(domain="default_warnings",
-                                     key="warn_default_regex_mismatch",
+            return {field: translate(domain="warnings",
+                                     key="warn_regex_mismatch",
                                      language_code=self.language).format(field)
                     for field in self.fields}
 
         tmp = {}
         for k, v in self.Meta.fields_error_msg.items():
             if type(v) in [list, tuple]:
-                tmp.update({k: [translate(domain="default_warnings", key=atom, language_code=self.language)
+                tmp.update({k: [translate(domain="warnings", key=atom, language_code=self.language)
                                 for atom in v]})
 
             else:
-                tmp.update({k: translate(domain="default_warnings", key=v, language_code=self.language)})
+                tmp.update({k: translate(domain="warnings", key=v, language_code=self.language)})
 
         return tmp
 
@@ -189,7 +193,7 @@ class ReceiverWithForceReply(ReceiverBasic):
             pre_field = self.fields[pre_index]
             regex_list = self.fields_regex.get(pre_field, [".*"])
             error_msg = self.fields_error_msg.get(pre_field,
-                                                  translate(domain="default_warnings",
+                                                  translate(domain="warnings",
                                                             key="warn_input_regex_mismatch",
                                                             language_code=self.language).format(pre_field))
 
@@ -226,11 +230,11 @@ class ReceiverWithForceReply(ReceiverBasic):
             field = self.fields[index]
 
             # provide cancel button.
-            self.bot_text = translate(domain="default_handlers",
+            self.bot_text = translate(domain="handlers",
                                       key="guide_force_reply_cancel",
                                       language_code=self.language)
             self.bot_markup = quick_markup(values={})
-            self.bot_markup.add(InlineKeyboardButton(text=translate(domain="default_buttons",
+            self.bot_markup.add(InlineKeyboardButton(text=translate(domain="buttons",
                                                                     key="cancel",
                                                                     language_code=self.language),
                                                      callback_data=self.link_route))
@@ -316,7 +320,7 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
         if self.fields is not None:
             self.fields_callback = getattr(self.Meta, "fields_callback", {field: field.lower().replace(" ", "_") for field in self.fields})
             self.fields_url = getattr(self.Meta, "fields_url", {field: None for field in self.fields})
-            self.values = {translate(domain="default_buttons",
+            self.values = {translate(domain="buttons",
                                      key=key,
                                      language_code=self.language): {
                 "callback_data": self.fields_callback.get(key, key.lower().replace(" ", "_")),
@@ -449,7 +453,7 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         self.filepath = f"{SenderWithBasic.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
         self.content = None
         self.bot_text = self.bot_text if self.bot_text is not None \
-            else translate(domain="default_handlers", key="sender_with_basic_download", language_code=self.language)
+            else translate(domain="handlers", key="sender_with_basic_download", language_code=self.language)
 
     async def __create_file(self, content) -> None:
         """
@@ -493,7 +497,7 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
 
         # exit if there is no content
         if self.content is None:
-            self.bot_text = translate(domain="default_warnings",
+            self.bot_text = translate(domain="warnings",
                                       key="warn_doc_without_content",
                                       language_code=self.language)
             await super().send_message()

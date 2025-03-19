@@ -1,6 +1,6 @@
-from core.handlers.handlers import SenderWithBasic
-from core.handlers.handlers import ResultShowingWithInlineMarkup
-from translation import translate
+from mizuhara.core.handlers.handlers import SenderWithBasic
+from mizuhara.core.handlers.handlers import ResultShowingWithInlineMarkup
+from mizuhara.translation import translate
 
 
 class ReceiverWithDocs(ResultShowingWithInlineMarkup):

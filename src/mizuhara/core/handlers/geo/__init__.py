@@ -1,8 +1,8 @@
 from urllib.parse import urlencode
 from requests import get as requests_get
 from telebot.types import ForceReply
-from core.handlers.handlers import ResultShowingWithInlineMarkup
-from translation import translate
+from mizuhara.core.handlers.handlers import ResultShowingWithInlineMarkup
+from mizuhara.translation import translate
 
 
 class ReceiverWithLocation(ResultShowingWithInlineMarkup):

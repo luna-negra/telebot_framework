@@ -1,5 +1,5 @@
-from core.handlers.handlers import SenderWithBasic
-from core.handlers.file.docs import ReceiverWithDocs
+from mizuhara.core.handlers.handlers import SenderWithBasic
+from mizuhara.core.handlers.file.docs import ReceiverWithDocs
 
 
 class ReceiverWithImage(ReceiverWithDocs):
