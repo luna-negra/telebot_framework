@@ -5,6 +5,21 @@ from mizuhara.translation import translate
 
 
 class SignInBasic(ReceiverWithForceReply):
+    """
+    SignInBasic:
+
+    this class is a template for signin process.
+    basic fields are compromised by "email" and "password".
+    user will type there email and password on your bot chatroom,
+    and it would be stored in CLIENT_INFO[self.chat_id]["data"].
+
+    if you need to change field's name or add more fields, please override __init__() method and change inner Meta class.
+    this class requires developers to override post_process() method to call API etc.
+
+    please do not forget to update CLIENT_INFO[self.chat_id]["is_signin"] to True in post_process(),
+    if the user success to signin.
+    """
+
     class Meta:
         fields = ["email", "password"]
         fields_text = {
@@ -34,6 +49,13 @@ class SignInBasic(ReceiverWithForceReply):
 
 
 class SignOutBasic(ReceiverBasic):
+    """
+    SignOutBasic:
+
+    this class is template for sign out process.
+    this class requires developers to override post_process() method to call API etc.
+    """
+
     async def pre_process(self) -> bool:
         if not CLIENT_INFO[self.chat_id].get("is_signin"):
             self.bot_text = translate(domain="warnings",
@@ -54,6 +76,16 @@ class SignOutBasic(ReceiverBasic):
 
 
 class SignUpBasic(ReceiverWithForceReply):
+    """
+    SignUpBasic:
+
+    this class is a template for sign up process.
+    it provides fields 'email' and 'password' as a default to allow user to sign up.
+
+    it is possible to edit regex and error message to check user input.
+    if you want to change values in Meta class, just override __init__() and change values.
+    """
+
     class Meta:
         fields = ["email", "password"]
         fields_text = {
@@ -84,6 +116,16 @@ class SignUpBasic(ReceiverWithForceReply):
 
 
 class DeleteAccountBasic(ReceiverWithForceReply):
+    """
+    DeleteAccountBasic:
+
+    this class is a template for delete account process.
+    it requires user to input password of account which the user would like to delete as a default.
+
+    if you need to change field's name or add more fields, please override __init__() method and change inner Meta class.
+    this class requires developers to override post_process() method to call API etc.
+    """
+
     class Meta:
         fields = ["password"]
         fields_text = {
