@@ -1,6 +1,5 @@
 import sys
 from os import mkdir, listdir
-from decimal import Inexact
 
 
 ROUTES_TEXT: str = \
