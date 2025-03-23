@@ -250,7 +250,7 @@ def create_project():
 
 def create_app(name:str):
     # check the project initiation
-    if ["config.py", "execute.py"] not in listdir():
+    if ("config.py" and "execute.py") not in listdir():
         create_project()
 
     mkdir(f"./{name}")
