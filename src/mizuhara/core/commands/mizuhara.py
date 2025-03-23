@@ -15,12 +15,10 @@ COMMANDS: list = [
 
 
 MESSAGES: list = [
-    connector_message(view=last),
 ]
 
 
 CALLBACKS: list = [
-    connector_callback(view=last)
 ]
 
 """
