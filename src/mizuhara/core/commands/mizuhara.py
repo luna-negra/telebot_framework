@@ -252,7 +252,7 @@ def create_project():
 
 def create_app(name:str):
     # check the project initiation
-    if ["config.py", "execute.py"] != listdir():
+    if ["config.py", "execute.py"] in listdir():
         create_project()
 
     mkdir(f"./{name}")
