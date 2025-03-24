@@ -37,7 +37,7 @@ Mizuhara was created to be used with connecting REST-API server.
 Install 'Mizuhara' by executing shell command below in your virtual environment.
 
 ```commandline
-pip install -y mizuhara
+pip install mizuhara
 ```
 
 After installation, you can use command 'mizuhara' on your shell terminal.
@@ -70,7 +70,7 @@ Please refer to the documentation at the link below.
 
 #### 4. Development Logs
 
-* 2025.03.23 : Start demo test.
+* 2025.03.23 : Start demo test and debugging.
 * 2025.03.22 : 1st debugging on PyPi. (current Pypi version is 0.0.18)
 * 2025.03.18 : Convert filesystem for PyPi packaging.
 * 2025.03.13 : Complete to create a draft version.
