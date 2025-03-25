@@ -1,6 +1,5 @@
 import sys
 from os import mkdir, listdir
-from decimal import Inexact
 
 
 ROUTES_TEXT: str = \
@@ -15,12 +14,10 @@ COMMANDS: list = [
 
 
 MESSAGES: list = [
-    connector_message(view=last),
 ]
 
 
 CALLBACKS: list = [
-    connector_callback(view=last)
 ]
 
 """
@@ -37,7 +34,9 @@ from mizuhara.core.routes import CLIENT_INFO
 """
 
 VIEWS_TEXT: str = \
-"""# please write down your code below.
+"""from {}.views import *
+# do not edit above this line.
+# please write down your code below.
 
 """
 
@@ -252,7 +251,7 @@ def create_project():
 
 def create_app(name:str):
     # check the project initiation
-    if ["config.py", "execute.py"] != listdir():
+    if ("config.py" and "execute.py") not in listdir():
         create_project()
 
     mkdir(f"./{name}")
@@ -269,7 +268,7 @@ def create_app(name:str):
         f.write(SERIALIZERS_TEXT)
 
     with open(f"./{name}/views.py", mode="w", encoding="utf-8") as f:
-        f.write(VIEWS_TEXT)
+        f.write(VIEWS_TEXT.format(name))
 
     return None
 
