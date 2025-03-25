@@ -34,7 +34,7 @@ from mizuhara.core.routes import CLIENT_INFO
 """
 
 VIEWS_TEXT: str = \
-"""from {}.views import *
+"""from execute import bot
 # do not edit above this line.
 # please write down your code below.
 
