@@ -247,6 +247,23 @@ def create_project():
     with open("./execute.py", mode="w", encoding="utf-8") as f:
         f.write(EXECUTE_TEXT)
 
+    # create translate yml files.
+    mkdir(path="./translation")
+    with open("./translation/buttons.yml", mode="w") as f:
+        f.write("")
+
+    with open("./translation/exceptions.yml", mode="w") as f:
+        f.write("")
+
+    with open("./translation/exceptions.yml", mode="w") as f:
+        f.write("")
+
+    with open("./translation/handlers.yml", mode="w") as f:
+        f.write("")
+
+    with open("./translation/warnings.yml", mode="w") as f:
+        f.write("")
+
     return None
 
 def create_app(name:str):
