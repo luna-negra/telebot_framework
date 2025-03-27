@@ -123,7 +123,7 @@ def __check_callback(reply, callback_data:str|list|tuple|None) -> bool:
 
             return data in callback_data if callback_data is not None else True
 
-        CLIENT_INFO[reply.from_user.id].update({"page": 0})
+        CLIENT_INFO[reply.from_user.id].update(page=0)
 
     return reply.data in callback_data if callback_data is not None else True
 
