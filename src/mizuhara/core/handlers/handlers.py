@@ -130,9 +130,8 @@ class ReceiverWithForceReply(ReceiverBasic):
 
     def __init__(self, types, link_route, **kwargs):
         super(ReceiverWithForceReply, self).__init__(types=types, **kwargs)
-        self.client_data = CLIENT_INFO[self.chat_id]["data"]
+        self.client_data = CLIENT_INFO[self.chat_id].get("data")
         self.link_route = link_route
-        #self.bot_markup = ForceReply()
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
@@ -223,7 +222,7 @@ class ReceiverWithForceReply(ReceiverBasic):
 
             else:
                 # save user's input to CLIENT_INFO, especially in "data"
-                CLIENT_INFO[self.chat_id]["data"].update({pre_field: self.client_response})
+                CLIENT_INFO[self.chat_id].data.update({pre_field: self.client_response})
 
         # Index is not equal to length of fields in Meta class.
         if index != len(self.fields):
@@ -253,7 +252,7 @@ class ReceiverWithForceReply(ReceiverBasic):
             index: int = CLIENT_INFO[self.chat_id].get("index") - 1
 
             # save user's last input to CLIENT_INFO[self.chat_id]["data"]
-            CLIENT_INFO[self.chat_id]["data"].update({self.fields[index]: self.client_response})
+            CLIENT_INFO[self.chat_id].data.update({self.fields[index]: self.client_response})
 
             # process with user data. it must be overridden by developer.
             await self.post_process()
