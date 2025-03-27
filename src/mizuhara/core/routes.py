@@ -1,5 +1,6 @@
 from execute import bot
 from config import ALLOWED_CHAT_TYPE
+from . import UserInfo
 
 
 # temporarily save the client information
@@ -84,11 +85,11 @@ def __check_client_info(chat_id:int, reset_index:bool) -> dict:
     """
 
     if CLIENT_INFO.get(chat_id, None) is None:
-        CLIENT_INFO.update({chat_id: {"route": "", "info": {}, "data": {}, "index": 0, "page": 0, "is_signin": False}})
+        CLIENT_INFO.update({chat_id: UserInfo()})
 
     else:
         if reset_index:
-            CLIENT_INFO[chat_id].update({"data": {}, "index": 0})
+            CLIENT_INFO[chat_id].update(data={}, index=0)
 
     return CLIENT_INFO[chat_id]
 

@@ -33,11 +33,11 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
-        self.language = CLIENT_INFO[self.chat_id].get("language", self.request_user.language_code)
+        self.language = CLIENT_INFO[self.chat_id].get("language") or self.request_user.language_code
         self.remove_user_msg = kwargs.get("remove_prev_msg", False)
         self.route = kwargs.get("route", None)
         if self.route is not None:
-            CLIENT_INFO[self.chat_id].update({"route": self.route})
+            CLIENT_INFO[self.chat_id].update(route=self.route)
 
     async def send_message(self) -> None:
         """
@@ -209,14 +209,14 @@ class ReceiverWithForceReply(ReceiverBasic):
                 if not re.search(pattern=regex, string=self.client_response):
                     self.bot_text = error_msg[0] if len(error_msg) != len(regex_list) else error_msg[inner_index]
                     self.bot_markup = None
-                    CLIENT_INFO[self.chat_id].update({"index": 0, "data": {}})
+                    CLIENT_INFO[self.chat_id].update(index=0, data={})
                     flag = True
                     break
 
             # if regex is not match.
             if flag:
                 await self.send_message()
-                CLIENT_INFO[self.chat_id].update({"index": index - 1})
+                CLIENT_INFO[self.chat_id].update(index=index - 1)
                 index -= 1
                 self.bot_markup = ForceReply()
                 flag = False
@@ -246,7 +246,7 @@ class ReceiverWithForceReply(ReceiverBasic):
             self.bot_markup = ForceReply()
 
             # update index number for referring.
-            CLIENT_INFO[self.chat_id].update({"index": index + 1})
+            CLIENT_INFO[self.chat_id].update(index=index + 1)
 
         # if user gave input for last field,
         else:
@@ -259,7 +259,7 @@ class ReceiverWithForceReply(ReceiverBasic):
             await self.post_process()
 
             # reset CLIENT_INFO and bot_markup.
-            CLIENT_INFO[self.chat_id].update({"index": 0, "data": {}})
+            CLIENT_INFO[self.chat_id].update(index=0, data={})
             self.bot_markup = None
             flag = True
 
