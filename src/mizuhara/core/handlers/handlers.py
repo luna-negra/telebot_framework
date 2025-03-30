@@ -146,7 +146,8 @@ class ReceiverWithForceReply(ReceiverBasic):
 
     def _translate_fields_text(self) -> dict:
         if getattr(self.Meta, "fields_text", None) is None:
-            return {field: field for field in self.fields}
+            return {field: translate(domain="handlers", key=field, language_code=self.language)
+                    for field in self.fields}
 
         return {k: translate(domain="handlers", key=v, language_code=self.language)
                 for k, v in self.Meta.fields_text.items()}
