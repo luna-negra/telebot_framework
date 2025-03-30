@@ -73,7 +73,7 @@ def connector_message(view,
     return None
 
 
-def __check_client_info(chat_id:int, reset_index:bool) -> dict:
+def __check_client_info(chat_id:int, reset_index:bool, types) -> dict:
     """
     __check_client_info:
     this method is charge of checking and assigning client info for first access.
@@ -81,11 +81,12 @@ def __check_client_info(chat_id:int, reset_index:bool) -> dict:
 
     :param chat_id: get from route_process.
     :param reset_index: set bool whether reset index or not.
+    :param types: types from client requests
     :return: None
     """
 
     if CLIENT_INFO.get(chat_id, None) is None:
-        CLIENT_INFO.update({chat_id: UserInfo()})
+        CLIENT_INFO.update({chat_id: UserInfo(types=types)})
 
     else:
         if reset_index:
@@ -166,7 +167,7 @@ def route_process(types,
     """
 
     chat_id: int = types.from_user.id
-    client_info: dict | None = __check_client_info(chat_id=chat_id, reset_index=reset_index)
+    client_info: dict | None = __check_client_info(chat_id=chat_id, reset_index=reset_index, types=types)
     condition1: bool = __check_route(client_info=client_info, allowed_pre_route=allowed_pre_route)
     condition2: bool = __check_callback(reply=types, callback_data=callback_data)
     return True if condition1 and condition2 else False
