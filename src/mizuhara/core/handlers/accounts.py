@@ -44,7 +44,7 @@ class SignInBasic(ReceiverWithForceReply):
             await self.bot.send_message(chat_id=self.chat_id,
                                         text=translate(domain="warnings",
                                                        key="warn_already_signin",
-                                                       language_code=self.language))
+                                                       types=self.types))
             return True
 
 
@@ -60,7 +60,7 @@ class SignOutBasic(ReceiverBasic):
         if not CLIENT_INFO[self.chat_id].get("is_signin"):
             self.bot_text = translate(domain="warnings",
                                       key="warn_already_signout",
-                                      language_code=self.language)
+                                      types=self.types)
             return False
         return True
 

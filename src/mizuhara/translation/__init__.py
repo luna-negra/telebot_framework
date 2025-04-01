@@ -1,9 +1,10 @@
 import importlib.resources
 from yaml import safe_load
 from os.path import exists
+from mizuhara.core.routes import CLIENT_INFO
 
 
-def translate(domain: str, key: str, language_code: str = "en") -> str:
+def translate(domain: str, key: str, types) -> str:
     """
     this function is charge of translate string, which is defined on yaml file in the same path, into another language_code.
     if you need customize, please create another yaml file on translation folder,
@@ -11,7 +12,7 @@ def translate(domain: str, key: str, language_code: str = "en") -> str:
 
     :param domain: name or alternate path of yaml file.
     :param key: name of main key in yaml file.
-    :param language_code: language that you want to translate to.
+    :param types: the type of telebot clients requests.
     :return: str
     """
 
@@ -33,4 +34,7 @@ def translate(domain: str, key: str, language_code: str = "en") -> str:
         else:
             return key
 
+    chat_id: int = types.from_user.id
+    data = CLIENT_INFO[chat_id].get("data")
+    language_code = data.get("language", types.from_user.language_code)
     return content.get(key.lower(), {}).get(language_code, key)
