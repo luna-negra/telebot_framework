@@ -135,10 +135,10 @@ class ReceiverWithForceReply(ReceiverBasic):
 
         self.fields = getattr(self.Meta, 'fields', ())
         if not isinstance(self.fields, (tuple, list)):
-            raise ValueError(translate(domain="exceptions", key="err_force_reply_fields_type", language_code=self.language))
+            raise ValueError(translate(domain="exceptions", key="err_force_reply_fields_type", types=self.types))
 
         if len(self.fields) == 0:
-            raise AttributeError(translate(domain="exceptions", key="err_force_reply_empty_field", language_code=self.language))
+            raise AttributeError(translate(domain="exceptions", key="err_force_reply_empty_field", types=self.types))
 
         self.fields_text = self._translate_fields_text()
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
@@ -146,27 +146,27 @@ class ReceiverWithForceReply(ReceiverBasic):
 
     def _translate_fields_text(self) -> dict:
         if getattr(self.Meta, "fields_text", None) is None:
-            return {field: translate(domain="handlers", key=field, language_code=self.language)
+            return {field: translate(domain="handlers", key=field, types=self.types)
                     for field in self.fields}
 
-        return {k: translate(domain="handlers", key=v, language_code=self.language)
+        return {k: translate(domain="handlers", key=v, types=self.types)
                 for k, v in self.Meta.fields_text.items()}
 
     def _translate_fields_error_msg(self) -> dict:
         if getattr(self.Meta, 'fields_error_msg', None) is None:
             return {field: translate(domain="warnings",
                                      key="warn_regex_mismatch",
-                                     language_code=self.language).format(field)
+                                     types=self.types).format(field)
                     for field in self.fields}
 
         tmp = {}
         for k, v in self.Meta.fields_error_msg.items():
             if type(v) in [list, tuple]:
-                tmp.update({k: [translate(domain="warnings", key=atom, language_code=self.language)
+                tmp.update({k: [translate(domain="warnings", key=atom, types=self.types)
                                 for atom in v]})
 
             else:
-                tmp.update({k: translate(domain="warnings", key=v, language_code=self.language)})
+                tmp.update({k: translate(domain="warnings", key=v, types=self.types)})
 
         return tmp
 
@@ -195,7 +195,7 @@ class ReceiverWithForceReply(ReceiverBasic):
             error_msg = self.fields_error_msg.get(pre_field,
                                                   translate(domain="warnings",
                                                             key="warn_input_regex_mismatch",
-                                                            language_code=self.language).format(pre_field))
+                                                            types=self.types).format(pre_field))
 
             if not isinstance(regex_list, (list, tuple)):
                 regex_list = [regex_list]
@@ -232,11 +232,11 @@ class ReceiverWithForceReply(ReceiverBasic):
             # provide cancel button.
             self.bot_text = translate(domain="handlers",
                                       key="guide_force_reply_cancel",
-                                      language_code=self.language)
+                                      types=self.types)
             self.bot_markup = quick_markup(values={})
             self.bot_markup.add(InlineKeyboardButton(text=translate(domain="buttons",
                                                                     key="cancel",
-                                                                    language_code=self.language),
+                                                                    types=self.types),
                                                      callback_data=self.link_route))
             await self.bot.send_message(chat_id=self.chat_id,
                                         text=self.bot_text,
@@ -322,7 +322,7 @@ class ReceiverWithInlineMarkup(ReceiverBasic):
             self.fields_url = getattr(self.Meta, "fields_url", {field: None for field in self.fields})
             self.values = {translate(domain="buttons",
                                      key=key,
-                                     language_code=self.language): {
+                                     types=self.types): {
                 "callback_data": self.fields_callback.get(key, key.lower().replace(" ", "_")),
                 "url": self.fields_url.get(key, None),
             } for key in self.fields}
@@ -453,7 +453,7 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         self.filepath = f"{SenderWithBasic.FILE_STORAGE_FOLDER}/{self.chat_id}/{filename}"
         self.content = None
         self.bot_text = self.bot_text if self.bot_text is not None \
-            else translate(domain="handlers", key="sender_with_basic_download", language_code=self.language)
+            else translate(domain="handlers", key="sender_with_basic_download", types=self.types)
 
     async def __create_file(self, content) -> None:
         """
@@ -499,7 +499,7 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         if self.content is None:
             self.bot_text = translate(domain="warnings",
                                       key="warn_doc_without_content",
-                                      language_code=self.language)
+                                      types=self.types)
             await super().send_message()
             return None
 
