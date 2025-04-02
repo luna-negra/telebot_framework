@@ -16,7 +16,7 @@ class UserInfo:
         self.data: dict = {}
         self.info: dict = {}
         self.index: int = 0
-        self.language: str | None = None
+        self.language: str = types.from_user.language_code
         self.is_signin: bool = False
         self.page: int = 0
         self.route: str = ""

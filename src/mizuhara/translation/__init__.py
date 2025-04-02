@@ -35,6 +35,6 @@ def translate(domain: str, key: str, types) -> str:
             return key
 
     chat_id: int = types.from_user.id
-    data = CLIENT_INFO[chat_id].get("data")
-    language_code = data.get("language", types.from_user.language_code)
+    language_code: str = CLIENT_INFO.get(chat_id).language if CLIENT_INFO.get(chat_id) is not None\
+        else types.from_user.language_code
     return content.get(key.lower(), {}).get(language_code, key)
