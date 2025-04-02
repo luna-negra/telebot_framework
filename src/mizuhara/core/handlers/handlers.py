@@ -8,7 +8,7 @@ from telebot.types import (InlineKeyboardButton,
 from telebot.asyncio_helper import ApiTelegramException
 from mizuhara.core.handlers import (Receiver,
                            CallbackQuery)
-from mizuhara.core.routes import CLIENT_INFO
+from mizuhara.core.routes import CLIENT_INFO, UserInfo
 from mizuhara.translation import translate
 from mizuhara.config import SECRET_MODE
 
@@ -33,9 +33,12 @@ class ReceiverBasic(Receiver):
         super(ReceiverBasic, self).__init__(types=types)
         self.bot_text: str | None = kwargs.get("bot_text", None)
         self.bot_markup = kwargs.get("bot_markup", None)
-        self.language = CLIENT_INFO[self.chat_id].get("language") or self.request_user.language_code
         self.remove_user_msg = kwargs.get("remove_prev_msg", False)
         self.route = kwargs.get("route", None)
+
+        if CLIENT_INFO.get(self.chat_id) is None:
+            CLIENT_INFO[self.chat_id] = UserInfo(types=self.types)
+
         if self.route is not None:
             CLIENT_INFO[self.chat_id].update(route=self.route)
 
