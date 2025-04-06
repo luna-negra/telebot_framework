@@ -268,7 +268,8 @@ class ReceiverWithForceReply(ReceiverBasic):
             self.bot_markup = None
             flag = True
 
-        await self.send_message()
+        if self.bot_text is not None:
+            await self.send_message()
         return flag
 
     async def post_process(self):
