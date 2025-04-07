@@ -25,6 +25,7 @@ class ReceiverBasic(Receiver):
       - bot_markup: markup contained in message that the bot will send to telegram user. Default is None.
       - remove_user_msg: bool value to decide to remove previous all user messages in chat room. Default is False(not remove)
       - route: set the telegram user's route in your bot application.
+      - result: it is used for store the result of api calling to reuse in another Receiver class.
 
     Use this class when you need to get a telegram user's request and just send a simple message with overriding send_message()
     """
@@ -35,6 +36,7 @@ class ReceiverBasic(Receiver):
         self.bot_markup = kwargs.get("bot_markup", None)
         self.remove_user_msg = kwargs.get("remove_prev_msg", False)
         self.route = kwargs.get("route", None)
+        self.result:dict | None = None
 
         if CLIENT_INFO.get(self.chat_id) is None:
             CLIENT_INFO[self.chat_id] = UserInfo(types=self.types)
@@ -266,7 +268,8 @@ class ReceiverWithForceReply(ReceiverBasic):
             self.bot_markup = None
             flag = True
 
-        await self.send_message()
+        if self.bot_text is not None:
+            await self.send_message()
         return flag
 
     async def post_process(self):
