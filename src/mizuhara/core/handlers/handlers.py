@@ -416,7 +416,7 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
         super(ReceiverWithInlineMarkupPagination, self).__init__(types, **kwargs)
 
         self.page = CLIENT_INFO[self.chat_id].get("page")
-        self.num_in_page = num_in_page
+        self.num_in_page = num_in_page + 1
         start_idx = self.page * self.num_in_page
         end_idx = start_idx + self.num_in_page
         total_page = int(len(self.fields) / self.num_in_page)
