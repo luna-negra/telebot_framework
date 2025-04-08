@@ -117,10 +117,10 @@ def __check_callback(reply, callback_data:str|list|tuple|None) -> bool:
             if callback_data is not None and data in callback_data:
                 page = CLIENT_INFO[reply.from_user.id].get("page")
                 if symbol == ">":
-                    CLIENT_INFO[reply.from_user.id].update({"page": page + 1})
+                    CLIENT_INFO[reply.from_user.id].update(page=page + 1)
 
                 elif symbol == "<":
-                    CLIENT_INFO[reply.from_user.id].update({"page": page - 1})
+                    CLIENT_INFO[reply.from_user.id].update(page=page - 1)
 
             return data in callback_data if callback_data is not None else True
 
