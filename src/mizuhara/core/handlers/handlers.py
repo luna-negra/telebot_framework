@@ -426,7 +426,10 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
         self.bot_markup = quick_markup(values=self.values, row_width=self.row_width)
 
         # Additional Buttons.
-        self.bot_markup.add(InlineKeyboardButton(text="Cancel", callback_data=f"{parent_route}"))
+        self.bot_markup.add(InlineKeyboardButton(text=translate(domain="buttons",
+                                                                key="cancel",
+                                                                types=self.types),
+                                                 callback_data=f"{parent_route}"))
         if total_page != 0:
             if 0 < self.page < total_page:
                 self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"),
