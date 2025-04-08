@@ -416,7 +416,7 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
         super(ReceiverWithInlineMarkupPagination, self).__init__(types, **kwargs)
 
         self.page = CLIENT_INFO[self.chat_id].get("page")
-        self.num_in_page = num_in_page + 1
+        self.num_in_page = num_in_page
         start_idx = self.page * self.num_in_page
         end_idx = start_idx + self.num_in_page
         total_page = int(len(self.fields) / self.num_in_page)
@@ -438,7 +438,7 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
             elif self.page == total_page:
                 self.bot_markup.add(InlineKeyboardButton(text="<", callback_data=f"{basic_route}__<"))
 
-            elif self.page == 0:
+            elif self.page == 0 and len(self.fields) != len(key_list):
                 self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
 
 
