@@ -93,7 +93,7 @@ class SignUpBasic(ReceiverWithForceReply):
             "password": "signup_password",
         }
         fields_regex = {
-            "email": ("^.*@.+\\..+$", "^.+@.+\\.com"),
+            "email": ("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",),
             "password": (
                 "[A-Z]+",
                 "[a-z]+",
