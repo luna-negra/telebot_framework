@@ -18,23 +18,25 @@ def translate(domain: str, key: str, types) -> str:
 
     # convert file name to file system format.
     file_name = f"{domain.replace("_", "/")}.yml"
-    try:
-        with importlib.resources.files("mizuhara.translation").joinpath(file_name).open("r", encoding="utf-8") as file:
+
+    # check if there's a user-defined translation file
+    if exists(f"translation/{file_name}"):
+        with open(f"translation/{file_name}", mode="r", encoding="utf-8") as file:
             content = safe_load(file) or {}
-            if content.get(key.lower(), None) is None:
-                raise ModuleNotFoundError
 
-    except (FileNotFoundError, ModuleNotFoundError):
-        # Check if there's a user-defined translation file
-        if exists(f"translation/{file_name}"):
-            with open(f"translation/{file_name}", mode="r", encoding="utf-8") as file:
+    # If no translation file exists, return the original key
+    else:
+        try:
+            with importlib.resources.files("mizuhara.translation").joinpath(file_name).open("r",
+                                                                                            encoding="utf-8") as file:
                 content = safe_load(file) or {}
+                if content.get(key.lower(), None) is None:
+                    raise ModuleNotFoundError
 
-        # If no translation file exists, return the original key
-        else:
+        except (FileNotFoundError, ModuleNotFoundError):
             return key
 
     chat_id: int = types.from_user.id
-    language_code: str = CLIENT_INFO.get(chat_id).language if CLIENT_INFO.get(chat_id) is not None\
+    language_code: str = CLIENT_INFO.get(chat_id).language if CLIENT_INFO.get(chat_id) is not None \
         else types.from_user.language_code
     return content.get(key.lower(), {}).get(language_code, key)
