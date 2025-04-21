@@ -14,6 +14,8 @@ class UserInfo:
     * is_signin: place the user's signin status with bool value.
     * page: this value would be used for InlineMarkupButton' pagination.
             this value is automatically assigned. do not use it directly.
+    * pre_route: this value display where the user come from in telebot application.
+                 this value is automatically assigned. do not use it directly
     * route: this value display user's location in telebot application.
              this value is automatically assigned. do not use it directly.
     * result: store the other information which you want to use temporarily.
@@ -32,6 +34,7 @@ class UserInfo:
         self.language: str = types.from_user.language_code
         self.is_signin: bool = False
         self.page: int = 0
+        self.pre_route: str = ""
         self.route: str = ""
         self.result: any = None
 
@@ -40,4 +43,7 @@ class UserInfo:
 
     def update(self, **kwargs):
         for k, v in kwargs.items():
+            if k == "route":
+                setattr(self, "pre_route", self.route)
+
             setattr(self, k, v)
