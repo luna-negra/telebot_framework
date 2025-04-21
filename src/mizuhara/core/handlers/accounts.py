@@ -99,6 +99,7 @@ class SignUpBasic(ReceiverWithForceReply):
                 "[a-z]+",
                 "[0-9]+",
                 "[!@#$%^&*()_+\\-=]+",
+                ".{8,}",
             )
         }
         fields_error_msg = {
@@ -108,6 +109,7 @@ class SignUpBasic(ReceiverWithForceReply):
                 "warn_password_no_lower",
                 "warn_password_no_digit",
                 "warn_password_no_special",
+                "warn_password_no_minimal",
             )
         }
 
