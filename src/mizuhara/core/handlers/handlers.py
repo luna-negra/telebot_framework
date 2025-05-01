@@ -212,7 +212,7 @@ class ReceiverWithForceReply(ReceiverBasic):
                 if not re.search(pattern=regex, string=self.client_response):
                     self.bot_text = error_msg[0] if len(error_msg) != len(regex_list) else error_msg[inner_index]
                     self.bot_markup = None
-                    CLIENT_INFO[self.chat_id].update(index=0, data={})
+                    CLIENT_INFO[self.chat_id].update(index=0)
                     flag = True
                     break
 
