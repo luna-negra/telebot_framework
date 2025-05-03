@@ -62,8 +62,17 @@ bot = AsyncTeleBot(token=TELEBOT_TOKEN,
                    validate_token=VALIDATE_TOKEN)
 
 
+# ignore unnecessary warning log
+warning_filter = logging.Filter()
+warning_filter.filter = lambda x: not ("deprecated" in x.getMessage().lower() and x.levelno == logging.WARNING)
+
 # set Log Level
-logger.setLevel(level=LOG_LEVEL)
+logger.setLevel(level=logging.ERROR)
+logger.addFilter(filter=warning_filter)
+
+mizuhara_logger = logging.getLogger("Mizuhara")
+mizuhara_logger.setLevel(level=LOG_LEVEL)
+mizuhara_logger.handlers = logger.handlers
 
 
 # main for set menu and polling.
@@ -202,9 +211,9 @@ SECRET_MODE: bool = True
 
 ### LOGGING CONFIG ###
 # Set the log level
-# default is ERROR
+# default is INFO
 # possible values: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
-LOG_LEVEL = "ERROR"
+LOG_LEVEL = "INFO"
 
 
 ### LOGGING CONFIG END ###

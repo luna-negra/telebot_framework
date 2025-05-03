@@ -11,6 +11,7 @@ from mizuhara.core.handlers import (Receiver,
 from mizuhara.core.routes import CLIENT_INFO, UserInfo
 from mizuhara.translation import translate
 from mizuhara.config import SECRET_MODE
+from execute import mizuhara_logger
 
 
 class ReceiverBasic(Receiver):
@@ -42,19 +43,17 @@ class ReceiverBasic(Receiver):
         if self.route is not None:
             CLIENT_INFO[self.chat_id].update(route=self.route)
 
-    async def send_message(self) -> None:
+        self._logging_init()
+
+    def _logging_init(self) -> None:
         """
-        send_message:
-        this method will make bot send message with bot_text to telegram user.
-        or use as a forking point with if-else condition by overriding this method.
+        _logging_init:
+        this method leave the info level log after creating the class instance.
 
         :return: None
         """
-
-        if await self._remove_prev_message():
-            await self.bot.send_message(chat_id=self.chat_id,
-                                        text=self.bot_text,
-                                        reply_markup=self.bot_markup)
+        log: str = f"chat_id: {self.chat_id}, msg_id: {self.message_id}, is_bot: {self.request_user.is_bot}, route: {self.route}"
+        mizuhara_logger.info(log)
         return None
 
     async def _remove_prev_message(self) -> bool:
@@ -104,6 +103,21 @@ class ReceiverBasic(Receiver):
 
         return None
 
+    async def send_message(self) -> None:
+        """
+        send_message:
+        this method will make bot send message with bot_text to telegram user.
+        or use as a forking point with if-else condition by overriding this method.
+
+        :return: None
+        """
+
+        if await self._remove_prev_message():
+            await self.bot.send_message(chat_id=self.chat_id,
+                                        text=self.bot_text,
+                                        reply_markup=self.bot_markup)
+        return None
+
 
 class ReceiverWithForceReply(ReceiverBasic):
     """
@@ -146,6 +160,18 @@ class ReceiverWithForceReply(ReceiverBasic):
         self.fields_text = self._translate_fields_text()
         self.fields_regex = getattr(self.Meta, 'fields_regex', {field: ".*" for field in self.fields})
         self.fields_error_msg = self._translate_fields_error_msg()
+
+    def _logging_init(self) -> None:
+        index: int = CLIENT_INFO[self.chat_id].get("index")
+
+        try:
+            log_info: str = f"chat_id: {self.chat_id}, msg_id: {self.message_id}, is_bot: {self.request_user.is_bot}, field: {self.Meta.fields[index]}, index: {index + 1}/{len(self.Meta.fields)}"
+
+        except IndexError:
+            log_info: str = f"chat_id: {self.chat_id}, msg_id: {self.message_id}, is_bot: {self.request_user.is_bot}, action: send_data"
+
+        mizuhara_logger.info(log_info)
+        return None
 
     def _translate_fields_text(self) -> dict:
         if getattr(self.Meta, "fields_text", None) is None:
@@ -441,6 +467,11 @@ class ReceiverWithInlineMarkupPagination(ReceiverWithInlineMarkup):
             elif self.page == 0 and len(self.fields) != len(key_list):
                 self.bot_markup.add(InlineKeyboardButton(text=">", callback_data=f"{basic_route}__>"))
 
+    def _logging_init(self) -> None:
+        log: str = f"chat_id: {self.chat_id}, msg_id: {self.message_id}, is_bot: {self.request_user.is_bot}, route: {self.route}, page: {CLIENT_INFO[self.chat_id].get("page") + 1}"
+        mizuhara_logger.info(log)
+        return None
+
 
 class SenderWithBasic(ResultShowingWithInlineMarkup):
     """
@@ -462,6 +493,15 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         self.bot_text = self.bot_text if self.bot_text is not None \
             else translate(domain="handlers", key="sender_with_basic_download", types=self.types)
 
+    async def _send_message(self):
+        """
+        this class is an inner method in send_message() which is important to send image or docs contents.
+        each Sender__ class must override this method to send contents with text message.
+
+        :return: None
+        """
+        pass
+
     async def __create_file(self, content) -> None:
         """
         this method is charge of producing new image with content from pre_process.
@@ -481,6 +521,16 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
             except FileNotFoundError:
                 makedirs(name="/".join(self.filepath.split("/")[:-1]), exist_ok=True)
 
+        return None
+
+    async def __remove_file(self):
+        """
+        this method removes download file which was temporarily stored in FILE_STORAGE_FOLDER.
+
+        :return: None
+        """
+
+        rmtree("/".join(self.filepath.split("/")[:-1]))
         return None
 
     async def pre_process(self) -> None:
@@ -526,22 +576,3 @@ class SenderWithBasic(ResultShowingWithInlineMarkup):
         await self.__remove_file()
 
         return None
-
-    async def __remove_file(self):
-        """
-        this method removes download file which was temporarily stored in FILE_STORAGE_FOLDER.
-
-        :return: None
-        """
-
-        rmtree("/".join(self.filepath.split("/")[:-1]))
-        return None
-
-    async def _send_message(self):
-        """
-        this class is an inner method in send_message() which is important to send image or docs contents.
-        each Sender__ class must override this method to send contents with text message.
-
-        :return: None
-        """
-        pass
